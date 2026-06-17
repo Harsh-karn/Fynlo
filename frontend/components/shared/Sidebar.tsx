@@ -5,7 +5,7 @@ export function Sidebar() {
   return (
     <div className="w-64 h-full bg-[#1a1a2e] text-white flex flex-col border-r border-[#2a2a4e]">
       <div className="p-6">
-        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">Finlo</h1>
+        <h1 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-500 to-purple-500">Fynlo</h1>
       </div>
       
       <nav className="flex-1 px-4 space-y-2 mt-4">

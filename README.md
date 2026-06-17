@@ -1,6 +1,6 @@
 <div align="center">
-  <img src="https://raw.githubusercontent.com/Harsh-karn/Finlu/main/frontend/public/globe.svg" width="100" alt="Finlo Logo" />
-  <h1 align="center">Finlo 💸</h1>
+  <img src="https://raw.githubusercontent.com/Harsh-karn/Finlu/main/frontend/public/globe.svg" width="100" alt="Fynlo Logo" />
+  <h1 align="center">Fynlo 💸</h1>
   <p align="center">
     <strong>A production-ready UPI expense tracking and AI-powered money management application.</strong>
   </p>
@@ -19,7 +19,7 @@
 <br />
 
 ## 🌟 Overview
-Finlo automatically tracks your expenses from multiple sources to give you a unified, beautifully visualized dashboard of your cash flow. It eliminates the hassle of manual entry by securely parsing your bank statements and SMS notifications, powered by **Google's Gemini 1.5 Flash AI**.
+Fynlo automatically tracks your expenses from multiple sources to give you a unified, beautifully visualized dashboard of your cash flow. It eliminates the hassle of manual entry by securely parsing your bank statements and SMS notifications, powered by **Google's Gemini 1.5 Flash AI**.
 
 ## 🚀 Key Features
 - **✨ AI-Powered Categorization:** Upload bank statements (PDF/CSV) and watch as Gemini AI seamlessly categorizes each transaction.

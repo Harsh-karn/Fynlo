@@ -4,8 +4,8 @@ from app.config import settings
 from app.routers import auth, transactions, sms, statements, budgets, analytics
 
 app = FastAPI(
-    title="Finlo API",
-    description="Backend API for Finlo UPI expense tracking app",
+    title="Fynlo API",
+    description="Backend API for Fynlo UPI expense tracking app",
     version="1.0.0"
 )
 
