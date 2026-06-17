@@ -34,29 +34,29 @@ FlowMoney automatically tracks your expenses from multiple sources to give you a
 
 ```mermaid
 graph TD
-    subgraph DataSources ["Data Sources"]
-        A["Android App / SMS"] -->|"POST /api/v1/sms/ingest"| B("FastAPI Backend")
-        C["Web Dashboard"] -->|"Upload PDF"| B
+    subgraph DataSources [Data Sources]
+        App[Android App SMS] -->|POST API| API(FastAPI Backend)
+        Web[Web Dashboard] -->|Upload PDF| API
     end
     
-    subgraph BackendProcessing ["Backend Processing"]
-        B -->|"Background Task"| D["Celery Worker Queue"]
-        D --> E{"PDF Plumber"}
-        E --> F(("Gemini AI 1.5 Flash"))
-        F -->|"Categorized Transactions"| G[("PostgreSQL DB")]
+    subgraph BackendProcessing [Backend Processing]
+        API -->|Task| Celery[Celery Worker]
+        Celery --> PDF{PDF Plumber}
+        PDF --> AI((Gemini AI))
+        AI -->|Categorized Data| DB[(PostgreSQL)]
     end
     
-    subgraph FrontendVisualization ["Frontend Visualization"]
-        G -->|"GET /api/v1/transactions"| H["Next.js Dashboard"]
+    subgraph Frontend [Frontend Visualization]
+        DB -->|GET API| Next[Next.js Dashboard]
     end
 
     classDef backend fill:#1e1e2e,stroke:#6366f1,stroke-width:2px,color:#fff;
     classDef frontend fill:#0f0f0f,stroke:#22c55e,stroke-width:2px,color:#fff;
     classDef ai fill:#3b0764,stroke:#d946ef,stroke-width:2px,color:#fff;
     
-    class B,D,G backend;
-    class H,C frontend;
-    class F ai;
+    class API,Celery,DB backend;
+    class Next,Web frontend;
+    class AI ai;
 ```
 
 ### Flow Breakdown:
