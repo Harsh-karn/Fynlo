@@ -1,54 +1,115 @@
-# FlowMoney 💸
+<div align="center">
+  <img src="https://raw.githubusercontent.com/Harsh-karn/Finlu/main/frontend/public/globe.svg" width="100" alt="FlowMoney Logo" />
+  <h1 align="center">FlowMoney 💸</h1>
+  <p align="center">
+    <strong>A production-ready UPI expense tracking and AI-powered money management application.</strong>
+  </p>
 
-A comprehensive, production-ready UPI expense tracking and money management application. FlowMoney automatically tracks your expenses from three sources:
-1. Android SMS auto-parsing
-2. Bank statement PDF/CSV upload with AI extraction (Gemini)
-3. Manual transactions
+  <p align="center">
+    <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI" />
+    <img src="https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js" />
+    <img src="https://img.shields.io/badge/Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin" />
+    <img src="https://img.shields.io/badge/PostgreSQL-336791?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+    <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker" />
+    <img src="https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white" alt="Celery" />
+    <img src="https://img.shields.io/badge/Gemini_AI-8E75B2?style=for-the-badge&logo=googlebard&logoColor=white" alt="Gemini" />
+  </p>
+</div>
 
-## Tech Stack
-- **Backend:** FastAPI, PostgreSQL, Redis, Celery, Alembic
-- **Frontend:** Next.js 15 (App Router), Tailwind CSS, shadcn/ui, Zustand, Recharts
-- **Android App:** Kotlin, MVVM, WorkManager, OkHttp
-- **AI/LLM:** Google Gemini 1.5 Flash
+<br />
 
-## Local Development Setup
+## 🌟 Overview
+FlowMoney automatically tracks your expenses from multiple sources to give you a unified, beautifully visualized dashboard of your cash flow. It eliminates the hassle of manual entry by securely parsing your bank statements and SMS notifications, powered by **Google's Gemini 1.5 Flash AI**.
 
-### 1. Prerequisites
+## 🚀 Key Features
+- **✨ AI-Powered Categorization:** Upload bank statements (PDF/CSV) and watch as Gemini AI seamlessly categorizes each transaction.
+- **📱 Background SMS Sync:** Companion Android app built in Kotlin automatically syncs your UPI transactions locally to the backend.
+- **⚡ Asynchronous Processing:** Heavy file parsing and AI model batching handled gracefully by **Celery & Redis**.
+- **📊 Aesthetic Dashboard:** Visualize your spending limits, recent transactions, and cash flow trends with **Next.js & Recharts**.
+- **🛡️ Secure & Scalable:** JWT Authentication, optimized Postgres queries, and fully Dockerized microservices.
+
+---
+
+## 🏗️ Architecture & Workflows
+
+```mermaid
+graph TD
+    subgraph "Data Sources"
+        A[Android App / SMS] -->|POST /api/v1/sms/ingest| B(FastAPI Backend)
+        C[Web Dashboard] -->|Upload PDF| B
+    end
+    
+    subgraph "Backend Processing"
+        B -->|Background Task| D[Celery Worker Queue]
+        D --> E{PDF Plumber}
+        E --> F((Gemini AI 1.5 Flash))
+        F --> |Categorized Transactions| G[(PostgreSQL DB)]
+    end
+    
+    subgraph "Frontend Visualization"
+        G -->|GET /api/v1/transactions| H[Next.js Dashboard]
+    end
+
+    classDef backend fill:#1e1e2e,stroke:#6366f1,stroke-width:2px,color:#fff;
+    classDef frontend fill:#0f0f0f,stroke:#22c55e,stroke-width:2px,color:#fff;
+    classDef ai fill:#3b0764,stroke:#d946ef,stroke-width:2px,color:#fff;
+    
+    class B,D,G backend;
+    class H,C frontend;
+    class F ai;
+```
+
+### Flow Breakdown:
+1. **SMS Sync:** The Kotlin Android App uses a `BroadcastReceiver` to detect UPI SMS. It queues an upload task via `WorkManager` to silently sync the transaction to the backend API.
+2. **PDF Statement Processing:** The user uploads a bank statement. The API immediately responds with a success status, while a **Celery** background worker begins executing the `process_statement_task`.
+3. **AI Categorization Pipeline:** The worker extracts tabular data, batches up to 20 transactions at a time, and passes them to the **Gemini AI** for intelligent categorization (e.g., Zomato → Food).
+4. **Data Delivery:** The **Next.js** frontend makes authorized API calls to retrieve the enriched, categorized data, plotting it on the beautiful dashboard.
+
+---
+
+## 💻 Tech Stack Breakdown
+| Domain | Technologies Used |
+|---|---|
+| **Backend API** | FastAPI, Python 3.11+, Pydantic v2, JWT (python-jose) |
+| **Database & ORM** | PostgreSQL, SQLAlchemy, Alembic Migrations |
+| **Task Queue** | Celery, Redis |
+| **AI / NLP** | Google Generative AI (Gemini 1.5 Flash API), pdfplumber |
+| **Frontend UI** | Next.js 15 (App Router), Tailwind CSS, shadcn/ui, Recharts, Zustand |
+| **Mobile App** | Kotlin, Room DB, WorkManager, OkHttp, Clean Architecture |
+| **Infrastructure** | Docker, Docker Compose |
+
+---
+
+## ⚙️ Local Development Setup
+
+### Prerequisites
 - Docker and Docker Compose
 - Node.js (v18+)
-- Python 3.11+
-- A Google Gemini API Key
+- A **Google Gemini API Key**
 
-### 2. Start the Backend Infrastructure
-The database (PostgreSQL) and cache (Redis) run in Docker along with the backend API and Celery workers.
+### 1. Start the Backend Infrastructure
+The database (PostgreSQL), cache (Redis), FastAPI Backend, and Celery workers all run seamlessly in Docker.
 ```bash
-# Rename the env example (if provided) and add your GEMINI_API_KEY
 # Start all backend containers
 docker-compose up -d --build
 ```
-The backend API will be available at `http://localhost:8000`.
-You can view the interactive Swagger API documentation at: **[http://localhost:8000/docs](http://localhost:8000/docs)**
+> The backend API will be available at `http://localhost:8000`. <br/>
+> View the interactive Swagger API documentation at: **[http://localhost:8000/docs](http://localhost:8000/docs)**
 
-### 3. Start the Frontend
-The Next.js frontend connects to the FastAPI backend.
+### 2. Start the Frontend
+The Next.js frontend connects directly to the FastAPI backend.
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
-The frontend will be available at `http://localhost:3000`.
+> The beautifully styled dashboard will be available at **[http://localhost:3000](http://localhost:3000)**.
 
-### 4. Android App
-The Android app is located in the `android/` directory. You can open this directory in Android Studio.
-The app listens for SMS broadcasts, parses UPI messages using regex, and uses a `WorkManager` background job to push the transactions securely to your local FastAPI backend.
+### 3. Android App
+The Android app is located in the `android/` directory. You can open this directory in Android Studio, build the APK, and install it on your device to test the live SMS syncing functionality!
 
-## Features Implemented
-- ✅ Full User Authentication (JWT)
-- ✅ Regex-based SMS Parser for Indian Banks
-- ✅ AI Categorization via Gemini 1.5 Flash
-- ✅ PDF Bank Statement Parsing
-- ✅ Next.js 15 Dashboard with Analytics
-- ✅ Spending Budgets & Threshold Alerts
-- ✅ Android SMS sync background worker
+---
 
-*(Demo GIF goes here)*
+<div align="center">
+  <i>Built with ❤️ for elegant, intelligent money management.</i>
+</div>

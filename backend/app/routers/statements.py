@@ -17,57 +17,10 @@ from app.utils.dependencies import get_current_user
 # and later refactor to Celery tasks in Phase 3.
 from app.services.pdf_parser import PDFParserService
 from app.services.ai_categorizer import AICategorizerService
+from app.workers.tasks import process_statement_task
+import base64
 
 router = APIRouter(prefix="/api/v1/statements", tags=["statements"])
-
-def process_statement_background(statement_id: UUID, file_bytes: bytes, user_id: UUID, db: Session):
-    statement = db.query(Statement).filter(Statement.id == statement_id).first()
-    if not statement:
-        return
-        
-    try:
-        statement.status = StatementStatus.processing
-        db.commit()
-        
-        # 1. Parse PDF
-        raw_txs = PDFParserService.parse_pdf(file_bytes, statement.bank_name)
-        
-        # 2. Categorize and Insert
-        inserted_count = 0
-        for tx_data in raw_txs:
-            # Check duplicate by reference id
-            if tx_data.get("reference_id"):
-                exists = db.query(Transaction).filter(
-                    Transaction.user_id == user_id,
-                    Transaction.reference_id == tx_data["reference_id"]
-                ).first()
-                if exists:
-                    continue
-                    
-            # We would await AI categorization here if it was fully async,
-            # but for background task simplicity we use the fallback synchronous categorization
-            category = AICategorizerService.fallback_categorize(tx_data["description"])
-            
-            new_tx = Transaction(
-                user_id=user_id,
-                amount=tx_data["amount"],
-                type=tx_data["type"],
-                category=category,
-                description=tx_data["description"],
-                reference_id=tx_data.get("reference_id"),
-                source="pdf_upload",
-                transaction_date=tx_data["transaction_date"]
-            )
-            db.add(new_tx)
-            inserted_count += 1
-            
-        statement.transactions_extracted = inserted_count
-        statement.status = StatementStatus.completed
-        db.commit()
-        
-    except Exception as e:
-        statement.status = StatementStatus.failed
-        db.commit()
 
 @router.post("/upload", response_model=StatementResponse, status_code=status.HTTP_201_CREATED)
 async def upload_statement(
@@ -95,8 +48,9 @@ async def upload_statement(
     db.commit()
     db.refresh(statement)
     
-    # Process in background
-    background_tasks.add_task(process_statement_background, statement.id, file_bytes, current_user.id, db)
+    # Process in background with Celery
+    file_b64 = base64.b64encode(file_bytes).decode('utf-8')
+    process_statement_task.delay(str(statement.id), file_b64, str(current_user.id), statement.bank_name)
     
     return statement
 
