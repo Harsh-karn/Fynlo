@@ -34,20 +34,20 @@ FlowMoney automatically tracks your expenses from multiple sources to give you a
 
 ```mermaid
 graph TD
-    subgraph "Data Sources"
-        A[Android App / SMS] -->|POST /api/v1/sms/ingest| B(FastAPI Backend)
-        C[Web Dashboard] -->|Upload PDF| B
+    subgraph DataSources ["Data Sources"]
+        A["Android App / SMS"] -->|"POST /api/v1/sms/ingest"| B("FastAPI Backend")
+        C["Web Dashboard"] -->|"Upload PDF"| B
     end
     
-    subgraph "Backend Processing"
-        B -->|Background Task| D[Celery Worker Queue]
-        D --> E{PDF Plumber}
-        E --> F((Gemini AI 1.5 Flash))
-        F --> |Categorized Transactions| G[(PostgreSQL DB)]
+    subgraph BackendProcessing ["Backend Processing"]
+        B -->|"Background Task"| D["Celery Worker Queue"]
+        D --> E{"PDF Plumber"}
+        E --> F(("Gemini AI 1.5 Flash"))
+        F -->|"Categorized Transactions"| G[("PostgreSQL DB")]
     end
     
-    subgraph "Frontend Visualization"
-        G -->|GET /api/v1/transactions| H[Next.js Dashboard]
+    subgraph FrontendVisualization ["Frontend Visualization"]
+        G -->|"GET /api/v1/transactions"| H["Next.js Dashboard"]
     end
 
     classDef backend fill:#1e1e2e,stroke:#6366f1,stroke-width:2px,color:#fff;
