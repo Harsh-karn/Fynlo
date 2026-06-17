@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: fynlo-api
+    env: python
+    plan: free
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "bash backend/start.sh"
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fynlo-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: fynlo-redis
+          property: connectionString
+      - key: GEMINI_API_KEY
+        sync: false # You will need to enter this manually in the dashboard
+
+  - type: redis
+    name: fynlo-redis
+    plan: free
+
+databases:
+  - name: fynlo-db
+    plan: free
