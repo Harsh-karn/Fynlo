@@ -11,8 +11,6 @@ pydantic-settings
 celery
 redis
 pdfplumber
-PyMuPDF
-pandas
 fastapi-mail
 python-dotenv
 pytest

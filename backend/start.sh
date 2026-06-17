@@ -10,7 +10,7 @@ python init_db.py
 
 # Start Celery worker in the background
 echo "Starting Celery worker..."
-celery -A app.workers.tasks worker --loglevel=info &
+celery -A app.workers.tasks worker --pool=solo --loglevel=info &
 
 # Start FastAPI server
 echo "Starting FastAPI server..."
