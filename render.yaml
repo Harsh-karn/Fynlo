@@ -21,6 +21,7 @@ services:
   - type: redis
     name: fynlo-redis
     plan: free
+    ipAllowList: []
 
 databases:
   - name: fynlo-db
