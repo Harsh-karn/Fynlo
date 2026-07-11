@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import api from "@/lib/api"
+import { CreditCard } from "lucide-react"
 
 const categoryColors: Record<string, string> = {
   food: "bg-orange-500/10 text-orange-500 border-orange-500/20",
@@ -53,39 +54,69 @@ export function TransactionTable() {
     fetchTransactions()
   }, [])
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading transactions...</div>
-  if (transactions.length === 0) return <div className="p-8 text-center text-gray-500">No transactions found.</div>
+  if (loading) {
+    return (
+      <div className="rounded-xl border border-[#2a2a4e] bg-[#1e1e2e] p-6 space-y-4 animate-pulse">
+        <div className="h-6 w-1/4 bg-white/5 rounded"></div>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex gap-4 items-center">
+              <div className="h-10 w-full bg-white/5 rounded"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+    )
+  }
+
+  if (transactions.length === 0) {
+    return (
+      <div className="rounded-xl border border-[#2a2a4e] bg-[#1e1e2e] p-12 text-center flex flex-col items-center justify-center space-y-3">
+        <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-400">
+          <CreditCard className="w-8 h-8 animate-pulse" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-gray-200">No recent transactions</p>
+          <p className="text-xs text-gray-400 max-w-[240px] mt-1">
+            Connect an Android device to sync messages or upload statements manually to populate transactions.
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="rounded-md border border-[#2a2a4e] bg-[#1e1e2e]">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-[#2a2a4e] hover:bg-transparent">
-            <TableHead className="text-gray-400">Date</TableHead>
-            <TableHead className="text-gray-400">Description</TableHead>
-            <TableHead className="text-gray-400">Merchant</TableHead>
-            <TableHead className="text-gray-400">Category</TableHead>
-            <TableHead className="text-right text-gray-400">Amount</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions.map((tx) => (
-            <TableRow key={tx.id} className="border-[#2a2a4e] hover:bg-[#2a2a4e]/50">
-              <TableCell className="font-medium text-gray-300">{new Date(tx.transaction_date).toLocaleDateString()}</TableCell>
-              <TableCell className="text-gray-300">{tx.description}</TableCell>
-              <TableCell className="text-gray-300">{tx.merchant_name || '-'}</TableCell>
-              <TableCell>
-                <Badge variant="outline" className={categoryColors[tx.category] || categoryColors.other}>
-                  {tx.category.charAt(0).toUpperCase() + tx.category.slice(1)}
-                </Badge>
-              </TableCell>
-              <TableCell className={`text-right font-medium ${tx.type === 'credit' ? 'text-emerald-500' : 'text-white'}`}>
-                {tx.type === 'credit' ? '+' : '-'}₹{(tx.amount / 100).toLocaleString()}
-              </TableCell>
+    <div className="rounded-xl border border-[#2a2a4e] bg-[#1e1e2e] overflow-hidden">
+      <div className="overflow-x-auto">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-[#2a2a4e] hover:bg-transparent">
+              <TableHead className="text-gray-400">Date</TableHead>
+              <TableHead className="text-gray-400">Description</TableHead>
+              <TableHead className="text-gray-400">Merchant</TableHead>
+              <TableHead className="text-gray-400">Category</TableHead>
+              <TableHead className="text-right text-gray-400">Amount</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+          </TableHeader>
+          <TableBody>
+            {transactions.map((tx) => (
+              <TableRow key={tx.id} className="border-[#2a2a4e] hover:bg-[#2a2a4e]/50">
+                <TableCell className="font-medium text-gray-300 whitespace-nowrap">{new Date(tx.transaction_date).toLocaleDateString()}</TableCell>
+                <TableCell className="text-gray-300 max-w-[200px] truncate">{tx.description}</TableCell>
+                <TableCell className="text-gray-300">{tx.merchant_name || '-'}</TableCell>
+                <TableCell>
+                  <Badge variant="outline" className={categoryColors[tx.category] || categoryColors.other}>
+                    {tx.category.charAt(0).toUpperCase() + tx.category.slice(1)}
+                  </Badge>
+                </TableCell>
+                <TableCell className={`text-right font-medium whitespace-nowrap ${tx.type === 'credit' ? 'text-emerald-500' : 'text-white'}`}>
+                  {tx.type === 'credit' ? '+' : '-'}₹{(tx.amount / 100).toLocaleString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   )
 }

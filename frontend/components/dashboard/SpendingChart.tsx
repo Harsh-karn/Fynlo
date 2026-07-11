@@ -2,6 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts"
+import { TrendingUp } from "lucide-react"
 
 interface TrendData {
   month: string
@@ -21,9 +22,9 @@ export function SpendingChart({ data = [] }: SpendingChartProps) {
       <CardHeader>
         <CardTitle>Cash Flow Overview</CardTitle>
       </CardHeader>
-      <CardContent className="pl-2">
+      <CardContent className="h-[300px] flex items-center justify-center pl-2">
         {hasData ? (
-          <ResponsiveContainer width="100%" height={300}>
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={data}>
               <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
               <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `₹${value}`} />
@@ -36,12 +37,19 @@ export function SpendingChart({ data = [] }: SpendingChartProps) {
             </BarChart>
           </ResponsiveContainer>
         ) : (
-          <div className="h-[300px] flex items-center justify-center text-gray-500 text-sm">
-            No historical data found.
+          <div className="flex flex-col items-center justify-center text-center p-6 space-y-3">
+            <div className="p-4 bg-indigo-500/10 rounded-full text-indigo-400">
+              <TrendingUp className="w-8 h-8 animate-pulse" />
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-200">No flow trends analyzed</p>
+              <p className="text-xs text-gray-400 max-w-[240px] mt-1">
+                Once transactions are recorded, your monthly income versus expense trend chart will load here.
+              </p>
+            </div>
           </div>
         )}
       </CardContent>
     </Card>
   )
 }
-

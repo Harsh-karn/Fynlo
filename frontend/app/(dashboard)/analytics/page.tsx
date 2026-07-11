@@ -4,7 +4,6 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SpendingChart } from "@/components/dashboard/SpendingChart"
 import api from "@/lib/api"
-import { Loader2 } from "lucide-react"
 
 interface CategoryBreakdown {
   category: string
@@ -59,9 +58,18 @@ export default function AnalyticsPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center gap-2 text-gray-500 animate-pulse text-lg py-4">
-          <Loader2 className="animate-spin size-5" />
-          <span>Crunching financial data...</span>
+        <div className="space-y-6 animate-pulse">
+          {/* Charts loading skeleton */}
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-[#1e1e2e] border border-[#2a2a4e] rounded-xl h-[350px] p-6 col-span-4 lg:col-span-2 flex flex-col justify-between">
+                <div className="h-6 w-1/4 bg-white/5 rounded"></div>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="w-32 h-32 rounded-full border-4 border-dashed border-white/5 animate-spin"></div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-4">

@@ -74,16 +74,38 @@ export default function DashboardPage() {
       </div>
       
       {loading ? (
-         <div className="text-gray-500 animate-pulse text-lg py-4">Syncing live financial data...</div>
+        <div className="space-y-6 animate-pulse">
+          {/* StatsCards loading skeleton */}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="bg-[#1e1e2e] border border-[#2a2a4e] rounded-xl h-28 p-6 flex flex-col justify-between">
+                <div className="h-4 w-1/2 bg-white/5 rounded"></div>
+                <div className="h-6 w-3/4 bg-white/5 rounded"></div>
+              </div>
+            ))}
+          </div>
+
+          {/* Charts loading skeleton */}
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="bg-[#1e1e2e] border border-[#2a2a4e] rounded-xl h-[350px] p-6 col-span-4 lg:col-span-2 flex flex-col justify-between">
+                <div className="h-6 w-1/4 bg-white/5 rounded"></div>
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="w-32 h-32 rounded-full border-4 border-dashed border-white/5 animate-spin"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       ) : (
-         <>
-           <StatsCards {...stats} />
-           
-           <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
-             <SpendingChart data={trends} />
-             <CategoryDonut data={breakdown} />
-           </div>
-         </>
+        <>
+          <StatsCards {...stats} />
+          
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
+            <SpendingChart data={trends} />
+            <CategoryDonut data={breakdown} />
+          </div>
+        </>
       )}
     </div>
   )
