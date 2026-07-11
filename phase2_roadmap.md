@@ -53,7 +53,7 @@
 11. **Set up automated backups with tested restore + point-in-time recovery**
     - **Category**: Database
     - **Priority**: Critical
-    - **Status**: Not started
+    - **Status**: Completed
 
 12. **Build transaction review/correction UI (confidence score + needs_review flag)**
     - **Category**: Frontend
