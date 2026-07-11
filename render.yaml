@@ -15,6 +15,11 @@ services:
           type: redis
           name: fynlo-redis
           property: connectionString
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+
 
   - type: redis
     name: fynlo-redis
