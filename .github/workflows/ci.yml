@@ -29,9 +29,9 @@ jobs:
 
       - name: Run Pytest
         env:
-          DATABASE_URL: sqlite:///:memory:
-          ENVIRONMENT: testing
-          JWT_SECRET_KEY: testing-jwt-secret-key-at-least-32-chars-long
+          DATABASE_URL: "sqlite:///:memory:"
+          ENVIRONMENT: "testing"
+          JWT_SECRET_KEY: "testing-jwt-secret-key-at-least-32-chars-long"
         run: |
           cd backend
           python -m pytest
@@ -68,9 +68,9 @@ jobs:
 
       - name: Build Next.js Application
         env:
-          NEXTAUTH_SECRET: testing-nextauth-secret-key-at-least-32-chars-long
-          NEXTAUTH_URL: http://localhost:3000
-          NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+          NEXTAUTH_SECRET: "testing-nextauth-secret-key-at-least-32-chars-long"
+          NEXTAUTH_URL: "http://localhost:3000"
+          NEXT_PUBLIC_API_URL: "http://localhost:8000/api/v1"
         run: |
           cd frontend
           npm run build
