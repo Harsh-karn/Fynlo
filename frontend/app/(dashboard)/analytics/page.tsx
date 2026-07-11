@@ -3,6 +3,8 @@
 import { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { SpendingChart } from "@/components/dashboard/SpendingChart"
+import { AlertCircle, RefreshCw } from "lucide-react"
+import { Button } from "@/components/ui/button"
 import api from "@/lib/api"
 
 interface CategoryBreakdown {
@@ -21,9 +23,13 @@ export default function AnalyticsPage() {
   const [trends, setTrends] = useState<TrendData[]>([])
   const [breakdown, setBreakdown] = useState<CategoryBreakdown[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     async function loadData() {
+      setLoading(true)
+      setError(null)
       try {
         const today = new Date()
         const yyyy = today.getFullYear()
@@ -43,12 +49,13 @@ export default function AnalyticsPage() {
         }
       } catch (err) {
         console.error("Failed to load analytics data", err)
+        setError("Failed to load analytics charts and category breakdown.")
       } finally {
         setLoading(false)
       }
     }
     loadData()
-  }, [])
+  }, [reloadKey])
 
   return (
     <div className="space-y-6">
@@ -70,6 +77,26 @@ export default function AnalyticsPage() {
               </div>
             ))}
           </div>
+        </div>
+      ) : error ? (
+        <div className="rounded-2xl border border-red-500/20 bg-red-950/10 p-8 text-center flex flex-col items-center justify-center space-y-4 max-w-xl mx-auto my-12">
+          <div className="p-4 bg-red-500/10 rounded-full text-red-400">
+            <AlertCircle className="w-10 h-10" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-white">Unable to load Analytics</h3>
+            <p className="text-sm text-gray-400 mt-2 leading-relaxed">
+              {error}
+            </p>
+          </div>
+          <Button
+            onClick={() => setReloadKey((k) => k + 1)}
+            variant="outline"
+            className="bg-[#1e1e2e] border-[#2a2a4e] text-white hover:bg-[#2a2a4e]/50 gap-2 px-5"
+          >
+            <RefreshCw className="size-4" />
+            Try Again
+          </Button>
         </div>
       ) : (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-4">

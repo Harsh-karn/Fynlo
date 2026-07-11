@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import api from "@/lib/api"
-import { CreditCard, ChevronLeft, ChevronRight } from "lucide-react"
+import { CreditCard, ChevronLeft, ChevronRight, AlertCircle, RefreshCw } from "lucide-react"
 
 const categoryColors: Record<string, string> = {
   food: "bg-orange-500/10 text-orange-500 border-orange-500/20",
@@ -39,13 +39,16 @@ interface Transaction {
 export function TransactionTable() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(20)
   const [total, setTotal] = useState(0)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     const fetchTransactions = async () => {
       setLoading(true)
+      setError(null)
       try {
         const res = await api.get(`/transactions/?page=${page}&limit=${limit}`)
         if (res.data) {
@@ -54,12 +57,13 @@ export function TransactionTable() {
         }
       } catch (e) {
         console.error("Failed to fetch transactions:", e)
+        setError("Could not retrieve transactions. Please check your network connection.")
       } finally {
         setLoading(false)
       }
     }
     fetchTransactions()
-  }, [page, limit])
+  }, [page, limit, reloadKey])
 
   const totalPages = Math.ceil(total / limit)
 
@@ -74,6 +78,30 @@ export function TransactionTable() {
             </div>
           ))}
         </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-500/20 bg-red-950/10 p-12 text-center flex flex-col items-center justify-center space-y-4">
+        <div className="p-4 bg-red-500/10 rounded-full text-red-400">
+          <AlertCircle className="w-8 h-8" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-white">Failed to load transactions</p>
+          <p className="text-xs text-gray-400 max-w-[280px] mt-1">
+            {error}
+          </p>
+        </div>
+        <Button
+          onClick={() => setReloadKey(k => k + 1)}
+          variant="outline"
+          className="bg-transparent border-[#2a2a4e] text-white hover:bg-[#2a2a4e]/50 gap-2 px-5"
+        >
+          <RefreshCw className="size-4" />
+          Try Again
+        </Button>
       </div>
     )
   }
