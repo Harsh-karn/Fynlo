@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { StatsCards } from "@/components/dashboard/StatsCards"
 import { SpendingChart } from "@/components/dashboard/SpendingChart"
+import { CategoryDonut } from "@/components/dashboard/CategoryDonut"
 import api from "@/lib/api"
 
 export default function DashboardPage() {
@@ -12,7 +13,8 @@ export default function DashboardPage() {
     savings: 0,
     savingsRate: 0.0
   });
-
+  const [trends, setTrends] = useState<any[]>([]);
+  const [breakdown, setBreakdown] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,14 +23,27 @@ export default function DashboardPage() {
         const today = new Date();
         const yyyy = today.getFullYear();
         const mm = String(today.getMonth() + 1).padStart(2, '0');
-        const res = await api.get(`/analytics/summary?date=${yyyy}-${mm}`);
-        if (res.data) {
+        const dateStr = `${yyyy}-${mm}`;
+
+        const [summaryRes, trendsRes, breakdownRes] = await Promise.all([
+          api.get(`/analytics/summary?date=${dateStr}`),
+          api.get(`/analytics/trends`),
+          api.get(`/analytics/category-breakdown?date=${dateStr}`)
+        ]);
+
+        if (summaryRes.data) {
           setStats({
-            income: res.data.total_income || 0,
-            expense: res.data.total_expense || 0,
-            savings: res.data.net_savings || 0,
-            savingsRate: res.data.savings_rate || 0.0
+            income: summaryRes.data.total_income || 0,
+            expense: summaryRes.data.total_expense || 0,
+            savings: summaryRes.data.net_savings || 0,
+            savingsRate: summaryRes.data.savings_rate || 0.0
           });
+        }
+        if (trendsRes.data) {
+          setTrends(trendsRes.data);
+        }
+        if (breakdownRes.data) {
+          setBreakdown(breakdownRes.data);
         }
       } catch (err) {
         console.error("Failed to load dashboard data", err);
@@ -49,18 +64,16 @@ export default function DashboardPage() {
       {loading ? (
          <div className="text-gray-500 animate-pulse text-lg py-4">Syncing live financial data...</div>
       ) : (
-         <StatsCards {...stats} />
+         <>
+           <StatsCards {...stats} />
+           
+           <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
+             <SpendingChart data={trends} />
+             <CategoryDonut data={breakdown} />
+           </div>
+         </>
       )}
-      
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <SpendingChart />
-        <div className="col-span-4 lg:col-span-1 space-y-4">
-            <div className="bg-[#1e1e2e] border border-[#2a2a4e] rounded-xl p-6 h-full flex flex-col justify-start text-gray-500">
-                <h3 className="text-xl font-semibold text-white mb-4">Live SMS Activity</h3>
-                <p className="text-sm">Waiting for incoming SMS transactions. Spend something to see this update!</p>
-            </div>
-        </div>
-      </div>
     </div>
   )
 }
+

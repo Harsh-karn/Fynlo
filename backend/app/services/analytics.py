@@ -87,8 +87,125 @@ class AnalyticsService:
         return breakdown
 
     @classmethod
+    def get_trends(cls, db: Session, user_id: UUID, months_count: int = 6) -> List[Dict[str, Any]]:
+        current_year = datetime.utcnow().year
+        current_month = datetime.utcnow().month
+        
+        trends = []
+        for i in range(months_count):
+            m = current_month - i
+            y = current_year
+            while m <= 0:
+                m += 12
+                y -= 1
+                
+            start_date, end_date = cls._get_month_bounds(y, m)
+            
+            base_query = db.query(func.sum(Transaction.amount)).filter(
+                Transaction.user_id == user_id,
+                Transaction.is_deleted == False,
+                Transaction.transaction_date >= start_date,
+                Transaction.transaction_date <= end_date
+            )
+            
+            income = base_query.filter(Transaction.type == TransactionType.credit).scalar() or 0
+            expense = base_query.filter(Transaction.type == TransactionType.debit).scalar() or 0
+            
+            month_label = calendar.month_abbr[m] + " " + str(y)[-2:]
+            
+            trends.append({
+                "month": month_label,
+                "income": float(income),
+                "expense": float(expense)
+            })
+            
+        return trends[::-1]
+
+    @classmethod
+    def get_daily_spending(cls, db: Session, user_id: UUID, year: int, month: int) -> List[Dict[str, Any]]:
+        start_date, end_date = cls._get_month_bounds(year, month)
+        
+        results = db.query(
+            func.date(Transaction.transaction_date).label('day'),
+            func.sum(Transaction.amount).label('total')
+        ).filter(
+            Transaction.user_id == user_id,
+            Transaction.is_deleted == False,
+            Transaction.type == TransactionType.debit,
+            Transaction.transaction_date >= start_date,
+            Transaction.transaction_date <= end_date
+        ).group_by(func.date(Transaction.transaction_date))\
+         .order_by(func.date(Transaction.transaction_date))\
+         .all()
+         
+        return [{"date": str(day), "amount": float(total)} for day, total in results]
+
+    @classmethod
+    def get_top_merchants(cls, db: Session, user_id: UUID, year: int, month: int, limit: int = 10) -> List[Dict[str, Any]]:
+        start_date, end_date = cls._get_month_bounds(year, month)
+        
+        results = db.query(
+            Transaction.merchant_name,
+            func.sum(Transaction.amount).label('total')
+        ).filter(
+            Transaction.user_id == user_id,
+            Transaction.is_deleted == False,
+            Transaction.type == TransactionType.debit,
+            Transaction.merchant_name != None,
+            Transaction.transaction_date >= start_date,
+            Transaction.transaction_date <= end_date
+        ).group_by(Transaction.merchant_name)\
+         .order_by(func.sum(Transaction.amount).desc())\
+         .limit(limit)\
+         .all()
+         
+        return [{"merchant": name, "amount": float(total)} for name, total in results]
+
+    @classmethod
+    def get_cashflow(cls, db: Session, user_id: UUID, year: int, month: int) -> List[Dict[str, Any]]:
+        start_date, end_date = cls._get_month_bounds(year, month)
+        
+        transactions = db.query(
+            Transaction.transaction_date,
+            Transaction.type,
+            Transaction.amount
+        ).filter(
+            Transaction.user_id == user_id,
+            Transaction.is_deleted == False,
+            Transaction.transaction_date >= start_date,
+            Transaction.transaction_date <= end_date
+        ).order_by(Transaction.transaction_date).all()
+        
+        daily_changes = {}
+        _, last_day = calendar.monthrange(year, month)
+        
+        for day in range(1, last_day + 1):
+            date_str = f"{year}-{month:02d}-{day:02d}"
+            daily_changes[date_str] = 0.0
+            
+        for tx_date, tx_type, amount in transactions:
+            date_str = tx_date.strftime("%Y-%m-%d")
+            if date_str in daily_changes:
+                if tx_type == TransactionType.credit:
+                    daily_changes[date_str] += float(amount)
+                else:
+                    daily_changes[date_str] -= float(amount)
+                    
+        running_balance = 0.0
+        cashflow = []
+        for date_str in sorted(daily_changes.keys()):
+            running_balance += daily_changes[date_str]
+            cashflow.append({
+                "date": date_str,
+                "balance": running_balance
+            })
+            
+        return cashflow
+
+    @classmethod
     def _get_month_bounds(cls, year: int, month: int):
         start_date = datetime(year, month, 1)
         _, last_day = calendar.monthrange(year, month)
         end_date = datetime(year, month, last_day, 23, 59, 59, 999999)
         return start_date, end_date
+
