@@ -48,7 +48,7 @@
 10. **Get legal review of privacy policy, consent flows, and DPDP compliance**
     - **Category**: Security & Compliance
     - **Priority**: Critical
-    - **Status**: Not started
+    - **Status**: Completed
 
 11. **Set up automated backups with tested restore + point-in-time recovery**
     - **Category**: Database
