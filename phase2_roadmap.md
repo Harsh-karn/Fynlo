@@ -28,7 +28,7 @@
 6. **Build merchant-to-category cache to cut repeat LLM calls and improve speed**
    - **Category**: AI Pipeline
    - **Priority**: High
-   - **Status**: Not started
+   - **Status**: Completed
 
 7. **Implement weekly/monthly spending summary notifications**
    - **Category**: Frontend
