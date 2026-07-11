@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File, BackgroundTasks, Query
 from sqlalchemy.orm import Session
 from typing import List
 from uuid import UUID
@@ -8,9 +8,10 @@ from app.database import get_db
 from app.models.user import User
 from app.models.statement import Statement, StatementStatus
 from app.models.transaction import Transaction
-from app.schemas.statement import StatementResponse
+from app.schemas.statement import StatementResponse, StatementListResponse
 from app.schemas.transaction import TransactionResponse
 from app.utils.dependencies import get_current_user
+
 
 # In a real app, this would use Celery. 
 # For now, we'll use FastAPI BackgroundTasks for simplicity and demonstration,
@@ -64,13 +65,23 @@ async def upload_statement(
     
     return statement
 
-@router.get("/", response_model=List[StatementResponse])
+@router.get("/", response_model=StatementListResponse)
 def get_statements(
+    page: int = Query(1, ge=1),
+    limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    statements = db.query(Statement).filter(Statement.user_id == current_user.id).order_by(Statement.uploaded_at.desc()).all()
-    return statements
+    query = db.query(Statement).filter(Statement.user_id == current_user.id)
+    total = query.count()
+    items = query.order_by(Statement.uploaded_at.desc()).offset((page - 1) * limit).limit(limit).all()
+    return {
+        "items": items,
+        "total": total,
+        "page": page,
+        "limit": limit
+    }
+
 
 @router.get("/{statement_id}/status", response_model=StatementResponse)
 def get_statement_status(

@@ -10,8 +10,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import api from "@/lib/api"
-import { CreditCard } from "lucide-react"
+import { CreditCard, ChevronLeft, ChevronRight } from "lucide-react"
 
 const categoryColors: Record<string, string> = {
   food: "bg-orange-500/10 text-orange-500 border-orange-500/20",
@@ -34,16 +35,22 @@ interface Transaction {
   type: 'credit' | 'debit'
 }
 
+
 export function TransactionTable() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(20)
+  const [total, setTotal] = useState(0)
 
   useEffect(() => {
     const fetchTransactions = async () => {
+      setLoading(true)
       try {
-        const res = await api.get('/transactions/')
-        if (res.data && res.data.items) {
-          setTransactions(res.data.items)
+        const res = await api.get(`/transactions/?page=${page}&limit=${limit}`)
+        if (res.data) {
+          setTransactions(res.data.items || [])
+          setTotal(res.data.total || 0)
         }
       } catch (e) {
         console.error("Failed to fetch transactions:", e)
@@ -52,7 +59,9 @@ export function TransactionTable() {
       }
     }
     fetchTransactions()
-  }, [])
+  }, [page, limit])
+
+  const totalPages = Math.ceil(total / limit)
 
   if (loading) {
     return (
@@ -86,7 +95,7 @@ export function TransactionTable() {
   }
 
   return (
-    <div className="rounded-xl border border-[#2a2a4e] bg-[#1e1e2e] overflow-hidden">
+    <div className="rounded-xl border border-[#2a2a4e] bg-[#1e1e2e] overflow-hidden flex flex-col">
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
@@ -117,6 +126,58 @@ export function TransactionTable() {
           </TableBody>
         </Table>
       </div>
+
+      {/* Pagination Controls */}
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[#2a2a4e] bg-[#1a1a2e]/30 text-sm">
+        <div className="text-gray-400">
+          Showing <span className="text-white font-medium">{Math.min((page - 1) * limit + 1, total)}</span> to{" "}
+          <span className="text-white font-medium">{Math.min(page * limit, total)}</span> of{" "}
+          <span className="text-white font-medium">{total}</span> results
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-gray-400 text-xs">Rows per page:</span>
+            <select
+              value={limit}
+              onChange={(e) => {
+                setLimit(Number(e.target.value))
+                setPage(1)
+              }}
+              className="bg-[#1e1e2e] border border-[#2a2a4e] text-white text-xs rounded px-2 py-1 outline-none focus:border-indigo-500"
+            >
+              {[10, 20, 50, 100].map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="flex items-center gap-1">
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              className="bg-transparent border-[#2a2a4e] text-white hover:bg-[#2a2a4e]/50 disabled:opacity-30"
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <span className="text-gray-300 px-2 min-w-[3rem] text-center">
+              Page {page} of {totalPages || 1}
+            </span>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={page >= totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              className="bg-transparent border-[#2a2a4e] text-white hover:bg-[#2a2a4e]/50 disabled:opacity-30"
+            >
+              <ChevronRight className="size-4" />
+            </Button>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
+
