@@ -1,7 +1,7 @@
 {
-  "python.defaultInterpreterPath": "${workspaceFolder}/backend/.venv/bin/python",
+  "python.defaultInterpreterPath": "/home/harsh/Fynlo/Fynlo/backend/.venv/bin/python",
   "python.analysis.extraPaths": [
-    "${workspaceFolder}/backend"
+    "./backend"
   ],
   "python.analysis.indexing": true,
   "python.analysis.typeCheckingMode": "basic"
