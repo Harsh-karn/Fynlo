@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getSession } from 'next-auth/react';
 
 // In a real app, we'd use environment variables
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -11,11 +12,15 @@ const api = axios.create({
 });
 
 // Interceptor to add auth token
-api.interceptors.request.use((config) => {
-  // We'll manage tokens via next-auth or localStorage in a real implementation.
-  // For simplicity here, assuming it's in localStorage if client-side
+api.interceptors.request.use(async (config) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('access_token');
+    let token = localStorage.getItem('access_token');
+    if (!token) {
+      const session = await getSession();
+      if (session) {
+        token = (session as any).accessToken;
+      }
+    }
     if (token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -24,3 +29,4 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
+
