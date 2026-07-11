@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+
 import { Button } from "@/components/ui/button"
 import api from "@/lib/api"
 import { CreditCard, ChevronLeft, ChevronRight, AlertCircle, RefreshCw } from "lucide-react"
@@ -33,6 +33,8 @@ interface Transaction {
   category: string
   amount: number
   type: 'credit' | 'debit'
+  confidence_score?: number
+  needs_review?: boolean
 }
 
 
@@ -44,6 +46,8 @@ export function TransactionTable() {
   const [limit, setLimit] = useState(20)
   const [total, setTotal] = useState(0)
   const [reloadKey, setReloadKey] = useState(0)
+
+  const [updating, setUpdating] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchTransactions = async () => {
@@ -64,6 +68,20 @@ export function TransactionTable() {
     }
     fetchTransactions()
   }, [page, limit, reloadKey])
+
+  const handleCategoryChange = async (txId: string, newCategory: string) => {
+    try {
+      setUpdating(txId)
+      const res = await api.patch(`/transactions/${txId}`, { category: newCategory })
+      if (res.data) {
+        setTransactions(txs => txs.map(tx => tx.id === txId ? { ...tx, category: newCategory, needs_review: false } : tx))
+      }
+    } catch (e) {
+      console.error("Failed to update category:", e)
+    } finally {
+      setUpdating(null)
+    }
+  }
 
   const totalPages = Math.ceil(total / limit)
 
@@ -142,9 +160,37 @@ export function TransactionTable() {
                 <TableCell className="text-gray-300 max-w-[200px] truncate">{tx.description}</TableCell>
                 <TableCell className="text-gray-300">{tx.merchant_name || '-'}</TableCell>
                 <TableCell>
-                  <Badge variant="outline" className={categoryColors[tx.category] || categoryColors.other}>
-                    {tx.category.charAt(0).toUpperCase() + tx.category.slice(1)}
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={tx.category}
+                      disabled={updating === tx.id}
+                      onChange={(e) => handleCategoryChange(tx.id, e.target.value)}
+                      className={`text-xs px-2 py-1 rounded-md border appearance-none cursor-pointer outline-none transition-colors ${
+                        tx.needs_review 
+                          ? 'border-red-500/50 bg-red-500/10 text-red-400 focus:border-red-500' 
+                          : categoryColors[tx.category] || categoryColors.other
+                      }`}
+                    >
+                      {Object.keys(categoryColors).map(cat => (
+                        <option key={cat} value={cat} className="bg-[#1e1e2e] text-white">
+                          {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                        </option>
+                      ))}
+                    </select>
+                    {tx.needs_review && (
+                      <div className="flex items-center gap-1 text-red-400" title="Low confidence, please review">
+                        <AlertCircle className="w-3.5 h-3.5" />
+                        {tx.confidence_score !== undefined && (
+                          <span className="text-[10px]">{(tx.confidence_score * 100).toFixed(0)}%</span>
+                        )}
+                      </div>
+                    )}
+                    {!tx.needs_review && tx.confidence_score !== undefined && (
+                       <span className="text-[10px] text-gray-500" title="AI Confidence">
+                         {(tx.confidence_score * 100).toFixed(0)}%
+                       </span>
+                    )}
+                  </div>
                 </TableCell>
                 <TableCell className={`text-right font-medium whitespace-nowrap ${tx.type === 'credit' ? 'text-emerald-500' : 'text-white'}`}>
                   {tx.type === 'credit' ? '+' : '-'}₹{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

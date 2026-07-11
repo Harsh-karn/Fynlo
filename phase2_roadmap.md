@@ -58,7 +58,7 @@
 12. **Build transaction review/correction UI (confidence score + needs_review flag)**
     - **Category**: Frontend
     - **Priority**: Critical
-    - **Status**: Not started
+    - **Status**: Completed
 
 13. **Build account deletion and data export flows (DPDP right-to-erasure)**
     - **Category**: Database

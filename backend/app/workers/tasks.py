@@ -116,6 +116,8 @@ def process_statement_task(self, statement_id_str: str, file_b64: str, user_id_s
                     if exists:
                         continue
                         
+                confidence_val = cat_data.get("confidence", 1.0)
+                
                 new_tx = Transaction(
                     user_id=user_id_str,
                     amount=tx_data["amount"],
@@ -126,7 +128,9 @@ def process_statement_task(self, statement_id_str: str, file_b64: str, user_id_s
                     description=tx_data["description"],
                     reference_id=tx_data.get("reference_id"),
                     source="pdf_upload",
-                    transaction_date=tx_data["transaction_date"]
+                    transaction_date=tx_data["transaction_date"],
+                    confidence_score=confidence_val,
+                    needs_review=True if confidence_val < 0.6 else False
                 )
                 db.add(new_tx)
                 inserted_count += 1

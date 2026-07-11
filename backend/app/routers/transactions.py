@@ -108,6 +108,9 @@ def update_transaction(
     update_data = transaction_in.model_dump(exclude_unset=True)
     for field, value in update_data.items():
         setattr(transaction, field, value)
+        
+    if "category" in update_data:
+        transaction.needs_review = False
 
     db.add(transaction)
     db.commit()
