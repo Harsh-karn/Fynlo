@@ -186,3 +186,76 @@ def test_account_lockout(db_session):
     assert db_user.locked_until.replace(tzinfo=None) < now_naive2  # Expired
 
 
+def test_data_export_and_account_deletion(db_session):
+    """Test DPDP Act compliance: data export (CSV + JSON) and account deletion."""
+    from app.models.user import User
+    from app.models.transaction import Transaction, TransactionType, TransactionCategory, TransactionSource
+    from app.utils.security import get_password_hash
+    from datetime import datetime as dt, timezone as tz
+
+    # --- Setup: create user + transactions ---
+    hashed = get_password_hash("testpassword123")
+    user = User(
+        email="exporttest@example.com",
+        password_hash=hashed,
+        name="Export Test",
+        currency="INR",
+        failed_login_attempts=0,
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    txn = Transaction(
+        user_id=user.id,
+        amount=25000,  # ₹250.00
+        type=TransactionType.debit,
+        category=TransactionCategory.food,
+        merchant_name="Swiggy",
+        description="Lunch order",
+        source=TransactionSource.manual,
+        transaction_date=dt.now(tz.utc),
+    )
+    db_session.add(txn)
+    db_session.commit()
+
+    # Login to get auth token
+    login_resp = client.post(
+        "/api/v1/auth/login",
+        data={"username": "exporttest@example.com", "password": "testpassword123"},
+    )
+    assert login_resp.status_code == 200
+    token = login_resp.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # --- 1. CSV export ---
+    csv_resp = client.get("/api/v1/auth/me/export?format=csv", headers=headers)
+    assert csv_resp.status_code == 200
+    assert "text/csv" in csv_resp.headers.get("content-type", "")
+    csv_content = csv_resp.content.decode("utf-8")
+    assert "transaction_id" in csv_content  # header row
+    assert "Swiggy" in csv_content
+    assert "250.0" in csv_content
+
+    # --- 2. JSON export ---
+    json_resp = client.get("/api/v1/auth/me/export?format=json", headers=headers)
+    assert json_resp.status_code == 200
+    assert "application/json" in json_resp.headers.get("content-type", "")
+    import json as json_lib
+    payload = json_lib.loads(json_resp.content)
+    assert payload["profile"]["email"] == "exporttest@example.com"
+    assert len(payload["transactions"]) == 1
+    assert payload["transactions"][0]["merchant_name"] == "Swiggy"
+    assert payload["transactions"][0]["amount_inr"] == 250.0
+
+    # --- 3. Account deletion ---
+    delete_resp = client.delete("/api/v1/auth/me", headers=headers)
+    assert delete_resp.status_code == 204
+
+    # --- 4. Verify user is gone ---
+    deleted_user = db_session.query(User).filter(User.email == "exporttest@example.com").first()
+    assert deleted_user is None
+
+    # --- 5. Token is now invalid (user doesn't exist) ---
+    me_resp = client.get("/api/v1/auth/me", headers=headers)
+    assert me_resp.status_code == 401
+

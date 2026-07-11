@@ -1,18 +1,24 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Query
+from fastapi.responses import StreamingResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
-import uuid
+import uuid, csv, io, json
 from datetime import datetime, timedelta, timezone
 from app.config import settings
 from app.database import get_db
 from app.models.user import User
+from app.models.transaction import Transaction
 from app.models.invite_token import InviteToken
+from app.models.statement import Statement
+from app.models.budget import Budget
+from app.models.sms_device import SmsDevice
 from app.schemas.user import UserCreate, UserResponse, UserUpdate, Token, TokenRefreshRequest
 from app.utils.security import get_password_hash, verify_password, create_access_token, create_refresh_token
 from app.utils.dependencies import get_current_user
 
 # Max failed attempts before temporary lockout
+
 MAX_FAILED_ATTEMPTS = 5
 LOCKOUT_DURATION_MINUTES = 15
 
@@ -180,3 +186,107 @@ def update_user_me(user_in: UserUpdate, current_user: User = Depends(get_current
     db.commit()
     db.refresh(current_user)
     return current_user
+
+
+@router.get("/me/export")
+def export_user_data(
+    format: str = Query("csv", regex="^(csv|json)$"),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Export all user data (transactions, profile) as CSV or JSON.
+    Required by India's DPDP Act — right to data portability.
+    """
+    transactions = db.query(Transaction).filter(
+        Transaction.user_id == current_user.id,
+        Transaction.is_deleted == False
+    ).order_by(Transaction.transaction_date.desc()).all()
+
+    if format == "json":
+        data = {
+            "profile": {
+                "id": str(current_user.id),
+                "name": current_user.name,
+                "email": current_user.email,
+                "phone_number": current_user.phone_number,
+                "currency": current_user.currency,
+                "created_at": current_user.created_at.isoformat() if current_user.created_at else None,
+            },
+            "transactions": [
+                {
+                    "id": str(t.id),
+                    "amount_paise": t.amount,
+                    "amount_inr": round(t.amount / 100, 2),
+                    "type": t.type.value if t.type else None,
+                    "category": t.category.value if t.category else None,
+                    "description": t.description,
+                    "merchant_name": t.merchant_name,
+                    "upi_id": t.upi_id,
+                    "reference_id": t.reference_id,
+                    "source": t.source.value if t.source else None,
+                    "transaction_date": t.transaction_date.isoformat() if t.transaction_date else None,
+                    "created_at": t.created_at.isoformat() if t.created_at else None,
+                }
+                for t in transactions
+            ],
+            "exported_at": datetime.now(timezone.utc).isoformat(),
+        }
+        json_bytes = json.dumps(data, indent=2, ensure_ascii=False).encode("utf-8")
+        return StreamingResponse(
+            io.BytesIO(json_bytes),
+            media_type="application/json",
+            headers={"Content-Disposition": f"attachment; filename=fynlo_data_{current_user.email}.json"}
+        )
+
+    # Default: CSV
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow([
+        "transaction_id", "date", "type", "category", "merchant",
+        "description", "amount_inr", "upi_id", "reference_id", "source"
+    ])
+    for t in transactions:
+        writer.writerow([
+            str(t.id),
+            t.transaction_date.strftime("%Y-%m-%d %H:%M") if t.transaction_date else "",
+            t.type.value if t.type else "",
+            t.category.value if t.category else "",
+            t.merchant_name or "",
+            t.description or "",
+            round(t.amount / 100, 2),
+            t.upi_id or "",
+            t.reference_id or "",
+            t.source.value if t.source else "",
+        ])
+    csv_bytes = output.getvalue().encode("utf-8")
+    return StreamingResponse(
+        io.BytesIO(csv_bytes),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=fynlo_transactions_{current_user.email}.csv"}
+    )
+
+
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_account(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Permanently delete the authenticated user's account and ALL associated data.
+    Required by India's DPDP Act — right to erasure (Article 12).
+    This action is irreversible.
+    """
+    user_id = current_user.id
+
+    # Cascade delete all user-owned data
+    db.query(Transaction).filter(Transaction.user_id == user_id).delete(synchronize_session=False)
+    db.query(Statement).filter(Statement.user_id == user_id).delete(synchronize_session=False)
+    db.query(Budget).filter(Budget.user_id == user_id).delete(synchronize_session=False)
+    db.query(SmsDevice).filter(SmsDevice.user_id == user_id).delete(synchronize_session=False)
+    db.query(InviteToken).filter(InviteToken.used_by_id == user_id).delete(synchronize_session=False)
+
+    # Delete the user record itself
+    db.delete(current_user)
+    db.commit()
+    return None
