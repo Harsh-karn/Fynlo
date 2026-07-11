@@ -1,6 +1,8 @@
+from decimal import Decimal
 from typing import Dict, Any, List
 
 class AICategorizerService:
+
     CATEGORY_KEYWORDS = {
         "food": ["zomato", "swiggy", "dominos", "mcdonalds", "kfc", "subway", "blinkit", "instamart", "zepto", "restaurant", "hotel", "dhaba", "cafe", "pizza"],
         "transport": ["ola", "uber", "rapido", "metro", "irctc", "redbus", "petrol", "fuel", "parking", "toll", "makemytrip", "ixigo", "indigo", "spicejet"],
@@ -24,7 +26,7 @@ class AICategorizerService:
         cls, 
         description: str, 
         merchant_or_upi: str, 
-        amount: int, 
+        amount: Decimal, 
         debit_or_credit: str
     ) -> Dict[str, Any]:
         

@@ -72,3 +72,7 @@ Thumbs.db
 
 # Project specific
 Fynlo_Production_Blueprint.txt
+*.db
+*.sqlite3
+Fynlo_Production_Blueprint.pdf
+agency-agents-app/

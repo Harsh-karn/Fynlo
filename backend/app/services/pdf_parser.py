@@ -3,6 +3,8 @@ import io
 import re
 from datetime import datetime
 from typing import List, Dict, Any, Optional
+from decimal import Decimal
+
 
 class PDFParserService:
     # A simplified version of what a real production parser would look like.
@@ -52,14 +54,14 @@ class PDFParserService:
             debit_str = re.sub(r'[^\d.]', '', debit_str)
             credit_str = re.sub(r'[^\d.]', '', credit_str)
             
-            amount_paise = 0
+            amount_val = Decimal("0.00")
             txn_type = None
             
             if debit_str and debit_str != "0" and debit_str != "0.00":
-                amount_paise = int(float(debit_str) * 100)
+                amount_val = Decimal(debit_str)
                 txn_type = "debit"
             elif credit_str and credit_str != "0" and credit_str != "0.00":
-                amount_paise = int(float(credit_str) * 100)
+                amount_val = Decimal(credit_str)
                 txn_type = "credit"
                 
             if not txn_type:
@@ -79,7 +81,7 @@ class PDFParserService:
                 "transaction_date": txn_date,
                 "description": desc,
                 "reference_id": ref if ref else None,
-                "amount": amount_paise,
+                "amount": amount_val,
                 "type": txn_type,
                 "merchant_name": None, # Will be determined by AI Categorizer
                 "upi_id": None

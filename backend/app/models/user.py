@@ -1,5 +1,5 @@
 import uuid
-from sqlalchemy import Column, String, Integer, DateTime, Boolean
+from sqlalchemy import Column, String, Integer, DateTime, Boolean, Numeric
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.sql import func
 from app.database import Base
@@ -13,7 +13,8 @@ class User(Base):
     name = Column(String, nullable=False)
     phone_number = Column(String, nullable=True)
     currency = Column(String, default="INR")
-    monthly_budget = Column(Integer, nullable=True) # Stored in paise/cents
+    monthly_budget = Column(Numeric(18, 2), nullable=True) # Stored as fixed-point Decimal
+
 
     # Account lockout fields
     failed_login_attempts = Column(Integer, default=0, nullable=False)

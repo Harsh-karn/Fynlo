@@ -207,7 +207,7 @@ def test_data_export_and_account_deletion(db_session):
 
     txn = Transaction(
         user_id=user.id,
-        amount=25000,  # ₹250.00
+        amount=250,  # ₹250.00
         type=TransactionType.debit,
         category=TransactionCategory.food,
         merchant_name="Swiggy",

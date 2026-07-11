@@ -216,8 +216,8 @@ def export_user_data(
             "transactions": [
                 {
                     "id": str(t.id),
-                    "amount_paise": t.amount,
-                    "amount_inr": round(t.amount / 100, 2),
+                    "amount_paise": int(t.amount * 100) if t.amount else 0,
+                    "amount_inr": float(t.amount) if t.amount else 0.0,
                     "type": t.type.value if t.type else None,
                     "category": t.category.value if t.category else None,
                     "description": t.description,
@@ -254,7 +254,7 @@ def export_user_data(
             t.category.value if t.category else "",
             t.merchant_name or "",
             t.description or "",
-            round(t.amount / 100, 2),
+            float(t.amount) if t.amount else 0.0,
             t.upi_id or "",
             t.reference_id or "",
             t.source.value if t.source else "",

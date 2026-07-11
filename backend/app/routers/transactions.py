@@ -128,6 +128,7 @@ def delete_transaction(
         raise HTTPException(status_code=404, detail="Transaction not found")
 
     transaction.is_deleted = True
+    transaction.deleted_at = datetime.utcnow()
     db.add(transaction)
     db.commit()
     return None

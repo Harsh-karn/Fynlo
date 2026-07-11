@@ -119,7 +119,7 @@ export function TransactionTable() {
                   </Badge>
                 </TableCell>
                 <TableCell className={`text-right font-medium whitespace-nowrap ${tx.type === 'credit' ? 'text-emerald-500' : 'text-white'}`}>
-                  {tx.type === 'credit' ? '+' : '-'}₹{(tx.amount / 100).toLocaleString()}
+                  {tx.type === 'credit' ? '+' : '-'}₹{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </TableCell>
               </TableRow>
             ))}

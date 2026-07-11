@@ -1,9 +1,11 @@
+from decimal import Decimal
 import re
 from typing import Optional, Dict, Any
 from datetime import datetime
 from app.models.transaction import TransactionType
 
 class SMSParserService:
+
     # 1. SBI Patterns
     # Debit: "INR 500.00 debited from A/c XX1234 on 15-01-25 to VPA zomato@okaxis Ref No 123456789. Call 18001234 for dispute."
     # Credit: "Rs.5000.00 credited to A/c XX1234 on 15/01/2025 from VPA rahul@okaxis Ref No 11223344"
@@ -78,10 +80,10 @@ class SMSParserService:
     MERCHANT_FROM_PATTERN = re.compile(r'(?i)from\s+([a-zA-Z0-9\s.\-_&@]+?)(?=\s+(?:via|upi|ref|on|\.|$))')
 
     @staticmethod
-    def clean_amount(amount_str: str) -> Optional[int]:
+    def clean_amount(amount_str: str) -> Optional[Decimal]:
         try:
-            return int(float(amount_str.replace(',', '')) * 100)
-        except ValueError:
+            return Decimal(amount_str.replace(',', ''))
+        except (ValueError, ArithmeticError):
             return None
 
     @staticmethod

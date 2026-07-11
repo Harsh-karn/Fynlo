@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
 from uuid import UUID
 from datetime import datetime
+from decimal import Decimal
 
 class UserBase(BaseModel):
     email: EmailStr
@@ -17,11 +18,12 @@ class UserUpdate(BaseModel):
     name: Optional[str] = None
     phone_number: Optional[str] = None
     currency: Optional[str] = None
-    monthly_budget: Optional[int] = None # in paise
+    monthly_budget: Optional[Decimal] = None
 
 class UserResponse(UserBase):
     id: UUID
-    monthly_budget: Optional[int] = None
+    monthly_budget: Optional[Decimal] = None
+
     created_at: datetime
     updated_at: datetime
 

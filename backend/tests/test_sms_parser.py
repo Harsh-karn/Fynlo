@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 from app.services.sms_parser import SMSParserService
 from app.models.transaction import TransactionType
 
@@ -9,7 +10,7 @@ def test_sbi_debit_parsing():
     
     assert result is not None
     assert result["is_upi_transaction"] is True
-    assert result["amount"] == 50000  # ₹500.00 -> 50000 paise
+    assert result["amount"] == Decimal("500.00")  # ₹500.00
     assert result["type"] == TransactionType.debit
     assert result["upi_id"] == "zomato@okaxis"
     assert result["merchant_name"] == "zomato@okaxis"
@@ -22,7 +23,7 @@ def test_sbi_credit_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 500000  # ₹5000.00 -> 500000 paise
+    assert result["amount"] == Decimal("5000.00")
     assert result["type"] == TransactionType.credit
     assert result["upi_id"] == "rahul@okaxis"
     assert result["reference_id"] == "11223344"
@@ -34,7 +35,7 @@ def test_hdfc_debit_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 25000
+    assert result["amount"] == Decimal("250")
     assert result["type"] == TransactionType.debit
     assert result["merchant_name"] == "SWIGGY"
     assert result["reference_id"] == "987654321"
@@ -45,7 +46,7 @@ def test_icici_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 500000
+    assert result["amount"] == Decimal("5000.00")
     assert result["type"] == TransactionType.credit
     assert result["merchant_name"] == "Rahul Kumar"
     assert result["reference_id"] == "112233445566"
@@ -57,7 +58,7 @@ def test_phonepe_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 120000
+    assert result["amount"] == Decimal("1200.00")
     assert result["type"] == TransactionType.debit
     assert result["merchant_name"] == "Flipkart"
     assert result["reference_id"] == "123456789012"
@@ -68,7 +69,7 @@ def test_gpay_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 45000
+    assert result["amount"] == Decimal("450")
     assert result["type"] == TransactionType.debit
     assert result["merchant_name"] == "Ola"
     assert result["reference_id"] == "9876543210"
@@ -79,7 +80,7 @@ def test_paytm_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 15000
+    assert result["amount"] == Decimal("150")
     assert result["type"] == TransactionType.debit
     assert result["merchant_name"] == "Zomato"
     assert result["reference_id"] == "123456789"
@@ -90,7 +91,7 @@ def test_generic_fallback_parsing():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is not None
-    assert result["amount"] == 30000
+    assert result["amount"] == Decimal("300")
     assert result["type"] == TransactionType.debit
     assert result["reference_id"] == "tx1002"
 
@@ -100,3 +101,4 @@ def test_non_financial_sms_returns_none():
     result = SMSParserService.parse_sms(raw_sms, received_at)
     
     assert result is None
+
