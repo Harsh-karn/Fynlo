@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
+from jose import jwt, JWTError
+import uuid
+from app.config import settings
 from app.database import get_db
 from app.models.user import User
-from app.schemas.user import UserCreate, UserResponse, UserUpdate, Token
+from app.schemas.user import UserCreate, UserResponse, UserUpdate, Token, TokenRefreshRequest
 from app.utils.security import get_password_hash, verify_password, create_access_token, create_refresh_token
 from app.utils.dependencies import get_current_user
 
@@ -45,6 +48,35 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
     return {
         "access_token": access_token,
         "refresh_token": refresh_token,
+        "token_type": "bearer"
+    }
+
+@router.post("/refresh", response_model=Token)
+def refresh_token_route(refresh_in: TokenRefreshRequest, db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate refresh token",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(refresh_in.refresh_token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        user_id_str: str = payload.get("sub")
+        token_type: str = payload.get("type")
+        if user_id_str is None or token_type != "refresh":
+            raise credentials_exception
+        user_id = uuid.UUID(user_id_str)
+    except (JWTError, ValueError):
+        raise credentials_exception
+
+    user = db.query(User).filter(User.id == user_id).first()
+    if user is None:
+        raise credentials_exception
+
+    access_token = create_access_token(subject=user.id)
+    new_refresh_token = create_refresh_token(subject=user.id)
+    return {
+        "access_token": access_token,
+        "refresh_token": new_refresh_token,
         "token_type": "bearer"
     }
 
