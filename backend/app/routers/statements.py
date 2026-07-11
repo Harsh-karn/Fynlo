@@ -29,10 +29,20 @@ async def upload_statement(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if not file.filename.endswith('.pdf') and not file.filename.endswith('.csv'):
-        raise HTTPException(status_code=400, detail="Only PDF and CSV files are supported")
+    # Validate MIME type
+    ALLOWED_MIME_TYPES = ["application/pdf", "text/csv", "application/csv", "text/comma-separated-values"]
+    if file.content_type not in ALLOWED_MIME_TYPES and not (file.filename.endswith('.pdf') or file.filename.endswith('.csv')):
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Only PDF and CSV files are supported")
         
     file_bytes = await file.read()
+    
+    # Enforce file size limit (10MB)
+    MAX_FILE_SIZE = 10 * 1024 * 1024 # 10MB
+    if len(file_bytes) > MAX_FILE_SIZE:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail="File size exceeds maximum limit of 10MB"
+        )
     
     # In production, upload file to Cloudinary/S3 and get URL.
     # For now, we mock the URL.
