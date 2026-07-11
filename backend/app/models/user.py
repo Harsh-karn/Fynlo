@@ -20,5 +20,10 @@ class User(Base):
     failed_login_attempts = Column(Integer, default=0, nullable=False)
     locked_until = Column(DateTime(timezone=True), nullable=True)
 
+    # AI usage and limits
+    ai_token_usage = Column(Integer, default=0, nullable=False)
+    ai_usage_limit = Column(Integer, default=50000, nullable=False) # e.g., 50k tokens per user (adjustable per tier)
+    fallback_to_regex = Column(Boolean, default=True, nullable=False)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

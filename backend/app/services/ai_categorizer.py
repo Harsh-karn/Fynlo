@@ -41,16 +41,40 @@ class AICategorizerService:
     @classmethod
     def categorize_transaction_batch(
         cls, 
-        transactions: List[Dict[str, Any]]
+        transactions: List[Dict[str, Any]],
+        db = None,
+        user_id = None
     ) -> List[Dict[str, Any]]:
+        is_allowed = True
+        if db and user_id:
+            from app.services.ai_limiter import AILimiterService
+            is_allowed, reason = AILimiterService.check_ai_allowance(db, user_id)
+            
         results = []
+        tokens_used = 0
         for tx in transactions:
             merchant_or_desc = tx.get('merchant_or_upi') or tx.get('description', '')
-            category = cls.keyword_categorize(merchant_or_desc)
+            
+            if is_allowed:
+                # FUTURE: LLM call goes here.
+                # For now, simulate LLM integration and token usage
+                tokens_used += 50
+                category = cls.keyword_categorize(merchant_or_desc)
+                confidence = 0.8 if category != "other" else 0.3
+            else:
+                # GRACEFUL DEGRADATION: Fallback to simple regex/keywords without LLM
+                category = cls.keyword_categorize(merchant_or_desc)
+                confidence = 0.4 if category != "other" else 0.1
+                
             results.append({
                 "category": category,
                 "sub_category": None,
                 "merchant_normalized": merchant_or_desc,
-                "confidence": 0.8 if category != "other" else 0.3
+                "confidence": confidence
             })
+            
+        if is_allowed and db and user_id and tokens_used > 0:
+            from app.services.ai_limiter import AILimiterService
+            AILimiterService.track_ai_usage(db, user_id, tokens_used)
+            
         return results

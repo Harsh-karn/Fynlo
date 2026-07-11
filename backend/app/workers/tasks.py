@@ -102,7 +102,7 @@ def process_statement_task(self, statement_id_str: str, file_b64: str, user_id_s
                     "debit_or_credit": tx["type"]
                 })
                 
-            categories = AICategorizerService.categorize_transaction_batch(cat_input)
+            categories = AICategorizerService.categorize_transaction_batch(cat_input, db=db, user_id=user_id_str)
             
             for j, tx_data in enumerate(batch):
                 cat_data = categories[j] if j < len(categories) else {}
