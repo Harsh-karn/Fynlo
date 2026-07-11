@@ -1,5 +1,16 @@
 from decimal import Decimal
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
+from pydantic import BaseModel, Field
+import json
+
+class LLMTransactionResult(BaseModel):
+    category: str = Field(..., description="The main category of the transaction (e.g., food, transport, shopping, etc.)")
+    sub_category: Optional[str] = Field(None, description="A more specific sub-category if applicable")
+    merchant_normalized: str = Field(..., description="The clean, normalized name of the merchant")
+    confidence: float = Field(..., description="Confidence score of the categorization between 0.0 and 1.0")
+
+class LLMBatchCategorizationResult(BaseModel):
+    transactions: List[LLMTransactionResult]
 
 class AICategorizerService:
 
@@ -20,6 +31,7 @@ class AICategorizerService:
             if any(kw in text for kw in keywords):
                 return category
         return "other"
+
 
     @classmethod
     async def categorize_transaction(
@@ -85,11 +97,28 @@ class AICategorizerService:
                 continue
             
             if is_allowed:
-                # FUTURE: LLM call goes here.
-                # For now, simulate LLM integration and token usage
+                # FUTURE: LLM call goes here with instructor/pydantic.
+                # For now, simulate LLM integration, token usage, AND schema validation
                 tokens_used += 50
                 category = cls.keyword_categorize(merchant_or_desc)
                 confidence = 0.8 if category != "other" else 0.3
+                
+                # Enforce schema validation on the "LLM" output
+                try:
+                    llm_result = LLMTransactionResult(
+                        category=category,
+                        sub_category=None,
+                        merchant_normalized=merchant_or_desc,
+                        confidence=confidence
+                    )
+                    category = llm_result.category
+                    merchant_or_desc = llm_result.merchant_normalized
+                    confidence = llm_result.confidence
+                except Exception as e:
+                    # Schema validation failed, fallback
+                    print(f"LLM Schema validation failed: {e}")
+                    category = "other"
+                    confidence = 0.1
             else:
                 # GRACEFUL DEGRADATION: Fallback to simple regex/keywords without LLM
                 category = cls.keyword_categorize(merchant_or_desc)

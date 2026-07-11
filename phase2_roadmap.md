@@ -38,7 +38,7 @@
 8. **Add schema-validated LLM responses + rule-based fallback categorizer**
    - **Category**: AI Pipeline
    - **Priority**: High
-   - **Status**: Not started
+   - **Status**: Completed
 
 9. **Build labeled evaluation set and track categorization accuracy over time**
    - **Category**: AI Pipeline
