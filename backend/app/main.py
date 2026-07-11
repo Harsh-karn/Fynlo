@@ -4,8 +4,17 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 import logging
+import sentry_sdk
 from app.config import settings
 from app.routers import auth, transactions, sms, statements, budgets, analytics
+
+# Initialize Sentry if configured
+if settings.SENTRY_DSN:
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        traces_sample_rate=1.0,
+    )
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)

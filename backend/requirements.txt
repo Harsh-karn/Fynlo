@@ -16,3 +16,4 @@ fastapi-mail
 python-dotenv
 pytest
 httpx
+sentry-sdk[fastapi]
