@@ -1,0 +1,17 @@
+[
+    {"description": "UBER INDIA SYSTEMS P", "expected_category": "transport"},
+    {"description": "SWIGGY*BANGALORE", "expected_category": "food"},
+    {"description": "ZOMATO ONLINE ORDER", "expected_category": "food"},
+    {"description": "AMZN Prime Subscription", "expected_category": "entertainment"},
+    {"description": "NETFLIX ENTERTAINMENT", "expected_category": "entertainment"},
+    {"description": "APOLLO PHARMACY", "expected_category": "health"},
+    {"description": "JIO PREPAID RECHARGE", "expected_category": "utilities"},
+    {"description": "BESCOM ELECTRICITY BILL", "expected_category": "utilities"},
+    {"description": "UDEMY ONLINE COURSE", "expected_category": "education"},
+    {"description": "FLIPKART INTERNET PVT", "expected_category": "shopping"},
+    {"description": "DMART SUPERMARKET", "expected_category": "shopping"},
+    {"description": "UNKNOWN VENDOR ABC", "expected_category": "other"},
+    {"description": "Salary for June", "expected_category": "salary"},
+    {"description": "HDFC RENT PAYMENT", "expected_category": "rent"},
+    {"description": "ZERODHA BROKING LTD", "expected_category": "investment"}
+]

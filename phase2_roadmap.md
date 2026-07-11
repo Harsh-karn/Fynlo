@@ -43,7 +43,7 @@
 9. **Build labeled evaluation set and track categorization accuracy over time**
    - **Category**: AI Pipeline
    - **Priority**: Critical
-   - **Status**: Not started
+   - **Status**: Completed
 
 10. **Get legal review of privacy policy, consent flows, and DPDP compliance**
     - **Category**: Security & Compliance

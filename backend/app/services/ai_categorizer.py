@@ -21,7 +21,11 @@ class AICategorizerService:
         "utilities": ["electricity", "jio", "airtel", "vi", "bsnl", "water", "gas", "wifi", "broadband", "recharge"],
         "health": ["pharmacy", "apollo", "medplus", "practo", "1mg", "hospital", "clinic", "doctor", "lab", "test"],
         "entertainment": ["netflix", "spotify", "hotstar", "prime", "bookmyshow", "pvr", "inox", "youtube"],
-        "education": ["udemy", "coursera", "byju", "unacademy", "leetcode", "college", "school", "tuition"]
+        "education": ["udemy", "coursera", "byju", "unacademy", "leetcode", "college", "school", "tuition"],
+        "rent": ["rent", "landlord", "pg", "hostel", "lease"],
+        "salary": ["salary", "payroll", "wages", "stipend"],
+        "investment": ["zerodha", "groww", "upstox", "mutual fund", "sip", "stocks", "bonds"],
+        "transfer": ["transfer", "upi", "imps", "neft", "rtgs"]
     }
 
     @classmethod
