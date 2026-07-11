@@ -1,6 +1,13 @@
-from app.database import engine, Base
-import app.models # Ensures all models are registered with Base.metadata
+import os
+from alembic.config import Config
+from alembic import command
 
-print("Creating database tables if they do not exist...")
-Base.metadata.create_all(bind=engine)
-print("Database tables created successfully!")
+print("Running database migrations...")
+# Find absolute path of alembic.ini relative to init_db.py location
+base_dir = os.path.dirname(os.path.abspath(__file__))
+alembic_ini_path = os.path.join(base_dir, "alembic.ini")
+
+alembic_cfg = Config(alembic_ini_path)
+command.upgrade(alembic_cfg, "head")
+print("Database migrations applied successfully!")
+
