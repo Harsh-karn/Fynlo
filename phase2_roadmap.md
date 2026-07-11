@@ -33,7 +33,7 @@
 7. **Implement weekly/monthly spending summary notifications**
    - **Category**: Frontend
    - **Priority**: High
-   - **Status**: Not started
+   - **Status**: Completed
 
 8. **Add schema-validated LLM responses + rule-based fallback categorizer**
    - **Category**: AI Pipeline

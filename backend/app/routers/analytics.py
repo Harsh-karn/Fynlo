@@ -23,6 +23,13 @@ def get_summary(
         
     return AnalyticsService.get_summary(db, current_user.id, year, month)
 
+@router.get("/notifications")
+def get_notifications(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    return AnalyticsService.get_notifications(db, current_user.id)
+
 @router.get("/category-breakdown")
 def get_category_breakdown(
     date: str,

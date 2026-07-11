@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+from decimal import Decimal
 from typing import Dict, Any, List
 from uuid import UUID
 from datetime import datetime
@@ -201,6 +202,57 @@ class AnalyticsService:
             })
             
         return cashflow
+
+    @classmethod
+    def get_notifications(cls, db: Session, user_id: UUID) -> List[Dict[str, Any]]:
+        notifications = []
+        now = datetime.utcnow()
+        year, month = now.year, now.month
+        
+        # Monthly Spend Summary
+        start_date, end_date = cls._get_month_bounds(year, month)
+        monthly_expense = db.query(func.sum(Transaction.amount)).filter(
+            Transaction.user_id == user_id,
+            Transaction.is_deleted == False,
+            Transaction.type == TransactionType.debit,
+            Transaction.transaction_date >= start_date,
+            Transaction.transaction_date <= end_date
+        ).scalar() or 0
+        
+        if monthly_expense > 0:
+            notifications.append({
+                "id": f"monthly_{year}_{month}",
+                "title": "Monthly Spending Update",
+                "message": f"You have spent ₹{monthly_expense:,.2f} so far this month.",
+                "type": "info",
+                "date": now.isoformat(),
+                "read": False
+            })
+            
+        # Top Category Alert
+        top_cat_query = db.query(Transaction.category, func.sum(Transaction.amount).label('total'))\
+            .filter(
+                Transaction.user_id == user_id,
+                Transaction.is_deleted == False,
+                Transaction.type == TransactionType.debit,
+                Transaction.transaction_date >= start_date,
+                Transaction.transaction_date <= end_date
+            )\
+            .group_by(Transaction.category)\
+            .order_by(func.sum(Transaction.amount).desc())\
+            .first()
+            
+        if top_cat_query and top_cat_query[1] > 0:
+            notifications.append({
+                "id": f"top_cat_{year}_{month}",
+                "title": "Top Spending Category",
+                "message": f"Your highest spend is in {top_cat_query[0].value.capitalize()} (₹{top_cat_query[1]:,.2f}).",
+                "type": "warning" if top_cat_query[1] > monthly_expense * Decimal('0.5') else "info",
+                "date": now.isoformat(),
+                "read": False
+            })
+
+        return notifications
 
     @classmethod
     def _get_month_bounds(cls, year: int, month: int):
