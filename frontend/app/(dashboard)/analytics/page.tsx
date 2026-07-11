@@ -12,8 +12,14 @@ interface CategoryBreakdown {
   percentage: number
 }
 
+interface TrendData {
+  month: string
+  income: number
+  expense: number
+}
+
 export default function AnalyticsPage() {
-  const [trends, setTrends] = useState<any[]>([])
+  const [trends, setTrends] = useState<TrendData[]>([])
   const [breakdown, setBreakdown] = useState<CategoryBreakdown[]>([])
   const [loading, setLoading] = useState(true)
 

@@ -6,6 +6,18 @@ import { SpendingChart } from "@/components/dashboard/SpendingChart"
 import { CategoryDonut } from "@/components/dashboard/CategoryDonut"
 import api from "@/lib/api"
 
+interface TrendData {
+  month: string
+  income: number
+  expense: number
+}
+
+interface CategoryBreakdown {
+  category: string
+  amount: number
+  percentage: number
+}
+
 export default function DashboardPage() {
   const [stats, setStats] = useState({
     income: 0,
@@ -13,8 +25,8 @@ export default function DashboardPage() {
     savings: 0,
     savingsRate: 0.0
   });
-  const [trends, setTrends] = useState<any[]>([]);
-  const [breakdown, setBreakdown] = useState<any[]>([]);
+  const [trends, setTrends] = useState<TrendData[]>([]);
+  const [breakdown, setBreakdown] = useState<CategoryBreakdown[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

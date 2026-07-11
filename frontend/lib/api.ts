@@ -18,7 +18,7 @@ api.interceptors.request.use(async (config) => {
     if (!token) {
       const session = await getSession();
       if (session) {
-        token = (session as any).accessToken;
+        token = (session as { accessToken?: string }).accessToken || null;
       }
     }
     if (token && config.headers) {

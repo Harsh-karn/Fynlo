@@ -73,10 +73,20 @@ export default function RegisterPage() {
         router.push("/")
         router.refresh()
       }
-    } catch (err: any) {
-      if (err.response?.data?.error?.message) {
-        setErrorMsg(err.response.data.error.message)
-      } else if (err.response?.status === 400) {
+    } catch (err) {
+      const error = err as {
+        response?: {
+          data?: {
+            error?: {
+              message?: string;
+            };
+          };
+          status?: number;
+        };
+      };
+      if (error.response?.data?.error?.message) {
+        setErrorMsg(error.response.data.error.message)
+      } else if (error.response?.status === 400) {
         setErrorMsg("A user with this email already exists.")
       } else {
         setErrorMsg("Failed to create account. Please try again.")

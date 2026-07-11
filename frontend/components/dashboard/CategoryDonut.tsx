@@ -65,8 +65,9 @@ export function CategoryDonut({ data }: CategoryDonutProps) {
               {hasData && (
                 <Tooltip
                   contentStyle={{ backgroundColor: "#1a1a2e", border: "1px solid #2a2a4e", borderRadius: "8px" }}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   formatter={(value: any, name: any, props: any) => [
-                    `₹${value.toLocaleString()} (${props.payload.percentage}%)`,
+                    `₹${Number(value).toLocaleString()} (${props.payload.percentage}%)`,
                     name
                   ]}
                 />

@@ -52,7 +52,7 @@ export default function LoginPage() {
         router.push("/")
         router.refresh()
       }
-    } catch (error) {
+    } catch {
       setAuthError("An unexpected error occurred. Please try again later.")
     } finally {
       setLoading(false)

@@ -1,8 +1,27 @@
-import NextAuth from "next-auth"
+import NextAuth, { User, Session } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
+import { JWT } from "next-auth/jwt"
 import api from "@/lib/api"
 
-async function refreshAccessToken(token: any) {
+interface CustomUser extends User {
+  accessToken?: string
+  refreshToken?: string
+  accessTokenExpires?: number
+}
+
+interface CustomJWT extends JWT {
+  accessToken?: string
+  refreshToken?: string
+  accessTokenExpires?: number
+  error?: string
+}
+
+interface CustomSession extends Session {
+  accessToken?: string
+  error?: string
+}
+
+async function refreshAccessToken(token: CustomJWT): Promise<CustomJWT> {
   try {
     const response = await api.post("/auth/refresh", {
       refresh_token: token.refreshToken,
@@ -47,15 +66,16 @@ const handler = NextAuth({
           })
           
           if (res.data && res.data.access_token) {
-            return {
+            const user: CustomUser = {
               id: "1",
               accessToken: res.data.access_token,
               refreshToken: res.data.refresh_token,
               accessTokenExpires: Date.now() + 30 * 60 * 1000,
-            } as any
+            }
+            return user
           }
           return null
-        } catch (e) {
+        } catch {
           return null
         }
       }
@@ -66,29 +86,34 @@ const handler = NextAuth({
   },
   callbacks: {
     async jwt({ token, user }) {
+      const customToken = token as CustomJWT
+      const customUser = user as CustomUser
+
       // Initial sign in
-      if (user) {
-        (token as any).accessToken = (user as any).accessToken;
-        (token as any).refreshToken = (user as any).refreshToken;
-        (token as any).accessTokenExpires = (user as any).accessTokenExpires;
-        return token
+      if (customUser) {
+        customToken.accessToken = customUser.accessToken
+        customToken.refreshToken = customUser.refreshToken
+        customToken.accessTokenExpires = customUser.accessTokenExpires
+        return customToken
       }
 
       // Return previous token if the access token has not expired yet
-      if (Date.now() < ((token as any).accessTokenExpires as number)) {
-        return token
+      if (customToken.accessTokenExpires && Date.now() < customToken.accessTokenExpires) {
+        return customToken
       }
 
       // Access token has expired, try to update it
-      return refreshAccessToken(token)
+      return refreshAccessToken(customToken)
     },
     async session({ session, token }) {
-      (session as any).accessToken = (token as any).accessToken;
-      (session as any).error = (token as any).error;
-      return session
+      const customSession = session as CustomSession
+      const customToken = token as CustomJWT
+
+      customSession.accessToken = customToken.accessToken
+      customSession.error = customToken.error
+      return customSession
     }
   }
 })
 
 export { handler as GET, handler as POST }
-

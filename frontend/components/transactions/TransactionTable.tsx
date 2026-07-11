@@ -23,8 +23,18 @@ const categoryColors: Record<string, string> = {
   other: "bg-gray-500/10 text-gray-500 border-gray-500/20",
 }
 
+interface Transaction {
+  id: string
+  transaction_date: string
+  description: string
+  merchant_name?: string
+  category: string
+  amount: number
+  type: 'credit' | 'debit'
+}
+
 export function TransactionTable() {
-  const [transactions, setTransactions] = useState<any[]>([])
+  const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
