@@ -179,6 +179,11 @@ def get_user_me(current_user: User = Depends(get_current_user)):
 @router.patch("/me", response_model=UserResponse)
 def update_user_me(user_in: UserUpdate, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     update_data = user_in.model_dump(exclude_unset=True)
+    
+    if "data_consent_given" in update_data:
+        if update_data["data_consent_given"] is True and current_user.data_consent_given is False:
+            current_user.data_consent_timestamp = datetime.utcnow()
+            
     for field, value in update_data.items():
         setattr(current_user, field, value)
 

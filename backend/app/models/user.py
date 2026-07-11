@@ -25,5 +25,9 @@ class User(Base):
     ai_usage_limit = Column(Integer, default=50000, nullable=False) # e.g., 50k tokens per user (adjustable per tier)
     fallback_to_regex = Column(Boolean, default=True, nullable=False)
 
+    # Privacy and Data Processing Consent (DPDP compliance)
+    data_consent_given = Column(Boolean, default=False, nullable=False)
+    data_consent_timestamp = Column(DateTime(timezone=True), nullable=True)
+
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

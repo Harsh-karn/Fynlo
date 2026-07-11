@@ -18,7 +18,7 @@
 4. **Build explicit informed-consent screens for SMS/statement data collection**
    - **Category**: Security & Compliance
    - **Priority**: Critical
-   - **Status**: Not started
+   - **Status**: Completed
 
 5. **Add soft deletes, Decimal money columns, indexes on hot query paths**
    - **Category**: Database
