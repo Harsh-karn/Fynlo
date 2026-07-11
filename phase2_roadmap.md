@@ -23,7 +23,7 @@
 5. **Add soft deletes, Decimal money columns, indexes on hot query paths**
    - **Category**: Database
    - **Priority**: High
-   - **Status**: Not started
+   - **Status**: Completed
 
 6. **Build merchant-to-category cache to cut repeat LLM calls and improve speed**
    - **Category**: AI Pipeline

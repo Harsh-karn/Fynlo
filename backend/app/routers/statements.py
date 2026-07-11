@@ -72,7 +72,7 @@ def get_statements(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    query = db.query(Statement).filter(Statement.user_id == current_user.id)
+    query = db.query(Statement).filter(Statement.user_id == current_user.id, Statement.is_deleted == False)
     total = query.count()
     items = query.order_by(Statement.uploaded_at.desc()).offset((page - 1) * limit).limit(limit).all()
     return {
@@ -89,7 +89,7 @@ def get_statement_status(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    statement = db.query(Statement).filter(Statement.id == statement_id, Statement.user_id == current_user.id).first()
+    statement = db.query(Statement).filter(Statement.id == statement_id, Statement.user_id == current_user.id, Statement.is_deleted == False).first()
     if not statement:
         raise HTTPException(status_code=404, detail="Statement not found")
     return statement
@@ -100,10 +100,13 @@ def delete_statement(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    statement = db.query(Statement).filter(Statement.id == statement_id, Statement.user_id == current_user.id).first()
+    statement = db.query(Statement).filter(Statement.id == statement_id, Statement.user_id == current_user.id, Statement.is_deleted == False).first()
     if not statement:
         raise HTTPException(status_code=404, detail="Statement not found")
         
-    db.delete(statement)
+    statement.is_deleted = True
+    from datetime import datetime
+    statement.deleted_at = datetime.utcnow()
+    db.add(statement)
     db.commit()
     return None

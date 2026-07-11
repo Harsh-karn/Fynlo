@@ -39,7 +39,7 @@ def get_budgets(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    budgets = db.query(Budget).filter(Budget.user_id == current_user.id).all()
+    budgets = db.query(Budget).filter(Budget.user_id == current_user.id, Budget.is_deleted == False).all()
     
     response_list = []
     for b in budgets:
@@ -73,7 +73,8 @@ def create_budget(
     # Check if budget for category already exists
     existing = db.query(Budget).filter(
         Budget.user_id == current_user.id,
-        Budget.category == budget_in.category
+        Budget.category == budget_in.category,
+        Budget.is_deleted == False
     ).first()
     
     if existing:
@@ -98,7 +99,7 @@ def update_budget(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == current_user.id).first()
+    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == current_user.id, Budget.is_deleted == False).first()
     if not budget:
         raise HTTPException(status_code=404, detail="Budget not found")
         
@@ -122,11 +123,13 @@ def delete_budget(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == current_user.id).first()
+    budget = db.query(Budget).filter(Budget.id == budget_id, Budget.user_id == current_user.id, Budget.is_deleted == False).first()
     if not budget:
         raise HTTPException(status_code=404, detail="Budget not found")
         
-    db.delete(budget)
+    budget.is_deleted = True
+    budget.deleted_at = datetime.utcnow()
+    db.add(budget)
     db.commit()
     return None
 
@@ -135,7 +138,7 @@ def get_budget_alerts(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    budgets = db.query(Budget).filter(Budget.user_id == current_user.id).all()
+    budgets = db.query(Budget).filter(Budget.user_id == current_user.id, Budget.is_deleted == False).all()
     alerts = []
     
     for b in budgets:
