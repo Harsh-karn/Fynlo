@@ -3,3 +3,5 @@ from app.models.transaction import Transaction, TransactionType, TransactionCate
 from app.models.statement import Statement, StatementStatus
 from app.models.budget import Budget, BudgetPeriod
 from app.models.sms_device import SmsDevice
+from app.models.invite_token import InviteToken
+

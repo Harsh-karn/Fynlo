@@ -11,6 +11,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str = Field(min_length=8)
+    invite_token: Optional[str] = None
 
 class UserUpdate(BaseModel):
     name: Optional[str] = None

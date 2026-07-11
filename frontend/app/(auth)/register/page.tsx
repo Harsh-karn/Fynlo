@@ -17,6 +17,7 @@ const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
   phone_number: z.string().optional().or(z.literal("")),
+  invite_token: z.string().optional().or(z.literal("")),
   password: z.string().min(8, { message: "Password must be at least 8 characters." }),
   confirmPassword: z.string()
 }).refine((data) => data.password === data.confirmPassword, {
@@ -41,6 +42,7 @@ export default function RegisterPage() {
       name: "",
       email: "",
       phone_number: "",
+      invite_token: "",
       password: "",
       confirmPassword: "",
     },
@@ -56,6 +58,7 @@ export default function RegisterPage() {
         password: data.password,
         name: data.name,
         phone_number: data.phone_number || null,
+        invite_token: data.invite_token || null,
         currency: "INR" // Default currency
       })
 
@@ -161,6 +164,22 @@ export default function RegisterPage() {
               {...register("phone_number")}
               className="bg-white/[0.03] border-white/[0.08] text-white focus:border-indigo-500/50 focus:ring-indigo-500/10 h-10 px-3"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="invite_token" className="text-gray-300">Invite Token (Optional in Dev)</Label>
+            <Input
+              id="invite_token"
+              type="text"
+              placeholder="FYNLO-BETA-XXXXXX"
+              {...register("invite_token")}
+              className={`bg-white/[0.03] border-white/[0.08] text-white focus:border-indigo-500/50 focus:ring-indigo-500/10 h-10 px-3 ${
+                errors.invite_token ? "border-red-500 focus:border-red-500" : ""
+              }`}
+            />
+            {errors.invite_token && (
+              <p className="text-red-400 text-xs mt-1">{errors.invite_token.message}</p>
+            )}
           </div>
 
           <div className="space-y-2">

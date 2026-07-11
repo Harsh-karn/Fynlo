@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     SMTP_USER: Optional[str] = None
     SMTP_PASSWORD: Optional[str] = None
     SENTRY_DSN: Optional[str] = None
+    REQUIRE_INVITE_TOKEN: bool = False
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

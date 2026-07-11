@@ -3,9 +3,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from jose import jwt, JWTError
 import uuid
+from datetime import datetime
 from app.config import settings
 from app.database import get_db
 from app.models.user import User
+from app.models.invite_token import InviteToken
 from app.schemas.user import UserCreate, UserResponse, UserUpdate, Token, TokenRefreshRequest
 from app.utils.security import get_password_hash, verify_password, create_access_token, create_refresh_token
 from app.utils.dependencies import get_current_user
@@ -14,6 +16,34 @@ router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 def register(user_in: UserCreate, db: Session = Depends(get_db)):
+    # Validate Invite Token if required
+    invite_token_obj = None
+    if settings.REQUIRE_INVITE_TOKEN:
+        if not user_in.invite_token:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Registration requires a valid invite token.",
+            )
+        invite_token_obj = db.query(InviteToken).filter(
+            InviteToken.token == user_in.invite_token,
+            InviteToken.is_used == False
+        ).first()
+        if not invite_token_obj:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid or already used invite token.",
+            )
+        if invite_token_obj.expires_at and invite_token_obj.expires_at < datetime.utcnow():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This invite token has expired.",
+            )
+        if invite_token_obj.email and invite_token_obj.email.lower() != user_in.email.lower():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="This invite token is restricted to a different email address.",
+            )
+
     user = db.query(User).filter(User.email == user_in.email).first()
     if user:
         raise HTTPException(
@@ -31,6 +61,14 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
+
+    # Consume invite token
+    if invite_token_obj:
+        invite_token_obj.is_used = True
+        invite_token_obj.used_by_id = db_user.id
+        db.add(invite_token_obj)
+        db.commit()
+
     return db_user
 
 @router.post("/login", response_model=Token)
