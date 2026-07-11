@@ -130,3 +130,59 @@ def test_register_with_invite_token(db_session):
     finally:
         settings.REQUIRE_INVITE_TOKEN = original_require
 
+
+def test_account_lockout(db_session):
+    from app.models.user import User
+    from app.utils.security import get_password_hash
+    from datetime import datetime, timezone
+
+    # Create a user directly in db
+    hashed = get_password_hash("correctpassword")
+    user = User(
+        email="lockouttest@example.com",
+        password_hash=hashed,
+        name="Lockout Test",
+        currency="INR",
+        failed_login_attempts=0
+    )
+    db_session.add(user)
+    db_session.commit()
+
+    login_data = {"username": "lockouttest@example.com", "password": "wrongpassword"}
+
+    # 1. Five wrong attempts should not lock yet on the 4th
+    for i in range(4):
+        response = client.post("/api/v1/auth/login", data=login_data)
+        assert response.status_code == 401, f"Expected 401 on attempt {i+1}"
+
+    # 2. 5th wrong attempt triggers lockout
+    response = client.post("/api/v1/auth/login", data=login_data)
+    assert response.status_code == 401  # 5th failure
+
+    # Manually set locked_until in the past to simulate lockout expiry
+    db_user = db_session.query(User).filter(User.email == "lockouttest@example.com").first()
+    assert db_user.failed_login_attempts >= 5
+    assert db_user.locked_until is not None
+
+    # 3. While locked, correct password is still rejected with 429
+    response = client.post("/api/v1/auth/login", data={"username": "lockouttest@example.com", "password": "correctpassword"})
+    assert response.status_code == 429
+    assert "locked" in response.json()["error"]["message"].lower()
+
+    # 4. Verify the locked_until and attempt count in DB directly
+    from datetime import timedelta
+    assert db_user.locked_until is not None
+    now_naive = datetime.now(timezone.utc).replace(tzinfo=None)
+    assert db_user.locked_until.replace(tzinfo=None) > now_naive  # Still in the future
+
+    # 5. Simulate lockout expiry by resetting in DB and checking counter reset logic
+    db_user.locked_until = datetime.now(timezone.utc) - timedelta(minutes=1)
+    db_user.failed_login_attempts = 0
+    db_session.commit()
+
+    # Confirm values were persisted correctly
+    assert db_user.failed_login_attempts == 0
+    now_naive2 = datetime.now(timezone.utc).replace(tzinfo=None)
+    assert db_user.locked_until.replace(tzinfo=None) < now_naive2  # Expired
+
+

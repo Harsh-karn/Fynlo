@@ -3,9 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
 import logging
 import sentry_sdk
 from app.config import settings
+from app.limiter import limiter
 from app.routers import auth, transactions, sms, statements, budgets, analytics
 
 # Initialize Sentry if configured
@@ -20,11 +23,16 @@ if settings.SENTRY_DSN:
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("fynlo")
 
+
 app = FastAPI(
     title="Fynlo API",
     description="Backend API for Fynlo UPI expense tracking app",
     version="1.0.0"
 )
+
+# Attach rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Configure CORS
 origins = [settings.FRONTEND_URL]
