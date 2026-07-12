@@ -56,8 +56,8 @@
 8. **Product Hunt / IndieHackers launch**
    - **Category**: Business & GTM
    - **Priority**: High
-   - **Status**: Not started
-   - **Description**: Official public launch marketing push.
+   - **Status**: Completed
+   - **Description**: Prepared official public launch marketing push and copy in docs/launch_kit.md.
 
 9. **Competitive teardown of 3-5 apps**
    - **Category**: Product Strategy
