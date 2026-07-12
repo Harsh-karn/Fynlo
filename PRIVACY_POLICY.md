@@ -21,7 +21,12 @@ When you register, we collect:
 To provide categorization and insights, we process:
 - **Bank Statements:** PDF or CSV files uploaded directly by you.
 - **Transaction SMS:** Data extracted locally from your device (if you opt-in to SMS sync).
-*Note: Fynlo extracts transaction amounts, merchant names, dates, and categories. We DO NOT extract or store OTPs, personal messages, or full bank account numbers.*
+
+### C. Prominent Disclosure for SMS Permissions (Google Play Policy)
+If you use our Android Application, we will request explicit permission to **RECEIVE_SMS** and **READ_SMS**. 
+- **Purpose:** This permission is required exclusively to automatically parse bank transaction SMS alerts to track your income and expenses in real-time.
+- **Data Handling:** SMS parsing is done strictly on-device using regex patterns. We DO NOT upload, store, or transmit your personal text messages. Only the extracted transaction metadata (merchant name, amount, date) is securely synced to your Fynlo dashboard.
+- **Opt-Out:** You can deny this permission and manually upload statements or enter transactions instead.
 
 ---
 
@@ -51,9 +56,9 @@ Under the DPDP Act, you are the Data Principal and retain full ownership of your
 
 ---
 
-## 5. AI and Third-Party Processing
-- **AI Categorization:** Fynlo uses Large Language Models (LLMs) to categorize unknown merchants. When data is sent to an LLM provider, we strip PII (Personally Identifiable Information). We only send the raw merchant string and transaction amount.
-- **Data Residency:** All data is encrypted at rest and in transit (TLS/SSL) and is stored on secure cloud servers located within [Insert Data Center Region, e.g., Mumbai, India] to comply with data localization preferences.
+## 5. Local AI Processing & Data Residency
+- **Local AI Categorization (Zero Data Sharing):** Fynlo utilizes a proprietary, privacy-first Local Machine Learning pipeline. Your transaction data (merchant names and amounts) is categorized using a lightweight Scikit-Learn model running directly on our secure servers. **We DO NOT send your data to any third-party LLM providers (like OpenAI or Google Gemini).** Your financial data never leaves our controlled infrastructure.
+- **Data Residency:** All data is encrypted at rest and in transit (TLS/SSL) and is stored on secure cloud servers located within India (Mumbai Region) to comply with data localization preferences.
 
 ---
 

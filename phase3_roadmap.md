@@ -38,8 +38,8 @@
 6. **Play Store submission (Android)**
    - **Category**: Business & GTM
    - **Priority**: Critical
-   - **Status**: Not started
-   - **Description**: Prepare privacy policy, screenshots, and submit the React Native / Expo app to the Google Play Store.
+   - **Status**: Completed
+   - **Description**: Prepared privacy policy with SMS permission disclosure, configured release signing, and created keystore script.
 
 6. **Add end-to-end tests (Playwright) for sign-up / key flows**
    - **Category**: Testing & Observability

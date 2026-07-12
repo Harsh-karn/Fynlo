@@ -15,10 +15,22 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        create("release") {
+            // These properties must be set in your ~/.gradle/gradle.properties or passed via CLI
+            storeFile = project.findProperty("FYNLO_RELEASE_STORE_FILE")?.let { file(it) } ?: file("release.keystore")
+            storePassword = project.findProperty("FYNLO_RELEASE_STORE_PASSWORD") as String? ?: "password123"
+            keyAlias = project.findProperty("FYNLO_RELEASE_KEY_ALIAS") as String? ?: "fynlo-key"
+            keyPassword = project.findProperty("FYNLO_RELEASE_KEY_PASSWORD") as String? ?: "password123"
+        }
+    }
+
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {

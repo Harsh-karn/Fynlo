@@ -1,4 +1,4 @@
-# Custom Domain Setup Guide (GoDaddy)
+go# Custom Domain Setup Guide (GoDaddy)
 
 Since you purchased your domain from **GoDaddy**, you don't need to buy anything from Vercel or Render. You simply need to point your GoDaddy domain to your existing hosting platforms using DNS records.
 
