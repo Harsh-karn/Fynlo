@@ -44,7 +44,7 @@
 6. **Add end-to-end tests (Playwright) for sign-up / key flows**
    - **Category**: Testing & Observability
    - **Priority**: Medium
-   - **Status**: Not started
+   - **Status**: Completed
    - **Description**: Write automated E2E tests for the critical path (Auth -> Connect Data -> View Insights).
 
 7. **Write operational metrics dashboard (querying active users, API costs)**
