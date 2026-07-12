@@ -58,3 +58,9 @@
    - **Priority**: High
    - **Status**: Not started
    - **Description**: Official public launch marketing push.
+
+9. **Competitive teardown of 3-5 apps**
+   - **Category**: Product Strategy
+   - **Priority**: Medium
+   - **Status**: Completed
+   - **Description**: Analyze competitors (Fold, Axio, INDmoney, Jupiter) to identify gaps, weaknesses, and clear positioning opportunities for Fynlo.
