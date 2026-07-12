@@ -17,6 +17,6 @@ export const config = {
      * - login (login page)
      * - register (register page)
      */
-    "/((?!api|_next/static|_next/image|favicon.ico|login|register).*)",
+    "/((?!api|_next/static|_next/image|favicon.ico|login|register|$).*)",
   ],
 }
