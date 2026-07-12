@@ -13,6 +13,10 @@
         android:supportsRtl="true"
         android:windowSoftInputMode="adjustResize"
         android:theme="@style/Theme.FlowMoney">
+
+        <!-- Sentry DSN configuration. Replace with real DSN in production. -->
+        <meta-data android:name="io.sentry.dsn" android:value="YOUR_SENTRY_DSN_HERE" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

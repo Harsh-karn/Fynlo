@@ -85,4 +85,7 @@ dependencies {
   // Added dependencies for SMS sync
   implementation("androidx.work:work-runtime-ktx:2.9.0")
   implementation("com.squareup.okhttp3:okhttp:4.12.0")
+
+  // Sentry for Crash Reporting
+  implementation("io.sentry:sentry-android:7.8.0")
 }

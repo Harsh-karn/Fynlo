@@ -26,7 +26,7 @@
 4. **Set up Crashlytics/Sentry for Android app**
    - **Category**: Testing & Observability
    - **Priority**: Medium
-   - **Status**: Not started
+   - **Status**: Completed
    - **Description**: Ensure frontend/mobile crashes are tracked effectively before public release.
 
 5. **Play Store submission (Android)**
