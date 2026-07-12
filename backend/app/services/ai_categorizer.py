@@ -2,6 +2,17 @@ from decimal import Decimal
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field
 import json
+import os
+import joblib
+
+# Load the local ML model if it exists
+local_ml_model = None
+try:
+    model_path = os.path.join(os.path.dirname(__file__), '..', 'models', 'ml', 'categorizer_model.pkl')
+    if os.path.exists(model_path):
+        local_ml_model = joblib.load(model_path)
+except Exception as e:
+    print(f"Failed to load local ML model: {e}")
 
 class LLMTransactionResult(BaseModel):
     category: str = Field(..., description="The main category of the transaction (e.g., food, transport, shopping, etc.)")
@@ -100,33 +111,23 @@ class AICategorizerService:
                 })
                 continue
             
-            if is_allowed:
-                # FUTURE: LLM call goes here with instructor/pydantic.
-                # For now, simulate LLM integration, token usage, AND schema validation
-                tokens_used += 50
-                category = cls.keyword_categorize(merchant_or_desc)
-                confidence = 0.8 if category != "other" else 0.3
-                
-                # Enforce schema validation on the "LLM" output
+            # Stage 2: Regex / Keywords
+            category = cls.keyword_categorize(merchant_or_desc)
+            confidence = 0.8 if category != "other" else 0.0
+            
+            # Stage 3: Local ML Model
+            if category == "other" and local_ml_model:
                 try:
-                    llm_result = LLMTransactionResult(
-                        category=category,
-                        sub_category=None,
-                        merchant_normalized=merchant_or_desc,
-                        confidence=confidence
-                    )
-                    category = llm_result.category
-                    merchant_or_desc = llm_result.merchant_normalized
-                    confidence = llm_result.confidence
+                    predicted = local_ml_model.predict([merchant_or_desc])[0]
+                    probs = local_ml_model.predict_proba([merchant_or_desc])[0]
+                    max_prob = max(probs)
+                    
+                    category = predicted
+                    confidence = float(max_prob)
                 except Exception as e:
-                    # Schema validation failed, fallback
-                    print(f"LLM Schema validation failed: {e}")
-                    category = "other"
-                    confidence = 0.1
-            else:
-                # GRACEFUL DEGRADATION: Fallback to simple regex/keywords without LLM
-                category = cls.keyword_categorize(merchant_or_desc)
-                confidence = 0.4 if category != "other" else 0.1
+                    print(f"ML prediction failed: {e}")
+            elif category == "other":
+                confidence = 0.1
                 
             results.append({
                 "category": category,
@@ -135,9 +136,8 @@ class AICategorizerService:
                 "confidence": confidence
             })
             
-            # Cache the newly found categorization if we used the 'LLM'
-            if is_allowed and merchant_or_desc and merchant_or_desc not in cache_dict:
-                # Only add if it's not already in new_caches
+            # Cache the newly found categorization if confident
+            if confidence > 0.6 and merchant_or_desc and merchant_or_desc not in cache_dict:
                 if not any(nc["merchant_name"] == merchant_or_desc for nc in new_caches):
                     new_caches.append({
                         "merchant_name": merchant_or_desc,

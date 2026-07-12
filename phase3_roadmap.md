@@ -20,7 +20,7 @@
 3. **Finalize pricing based on real unit economics**
    - **Category**: Business & GTM
    - **Priority**: Critical
-   - **Status**: Not started
+   - **Status**: Completed
    - **Description**: Ensure the subscription cost covers AI tokens, database hosting, and expected margins.
 
 4. **Set up Crashlytics/Sentry for Android app**

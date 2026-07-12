@@ -19,3 +19,5 @@ httpx
 sentry-sdk[fastapi]
 slowapi
 razorpay
+scikit-learn
+joblib
