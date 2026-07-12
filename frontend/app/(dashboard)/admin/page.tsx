@@ -29,7 +29,7 @@ interface OpsMetrics {
 }
 
 export default function AdminDashboard() {
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const router = useRouter()
   const [metrics, setMetrics] = useState<OpsMetrics | null>(null)
   const [loading, setLoading] = useState(true)
@@ -46,8 +46,13 @@ export default function AdminDashboard() {
       try {
         const response = await api.get("/ops/metrics")
         setMetrics(response.data)
-      } catch (err: any) {
-        setError(err.response?.data?.error?.message || "Failed to load metrics")
+      } catch (err: unknown) {
+        if (err && typeof err === 'object' && 'response' in err) {
+          const axiosErr = err as { response?: { data?: { error?: { message?: string } } } }
+          setError(axiosErr.response?.data?.error?.message || "Failed to load metrics")
+        } else {
+          setError(err instanceof Error ? err.message : "Failed to load metrics")
+        }
       } finally {
         setLoading(false)
       }

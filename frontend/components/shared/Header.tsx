@@ -1,7 +1,7 @@
 "use client";
 
 import { useSession, signOut } from 'next-auth/react'
-import { Bell, User, LogOut, Menu, X } from 'lucide-react'
+import { Bell, LogOut, Menu } from 'lucide-react'
 import { useState, useEffect, useRef } from 'react'
 import api from '@/lib/api'
 
