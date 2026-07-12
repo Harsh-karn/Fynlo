@@ -88,4 +88,7 @@ dependencies {
 
   // Sentry for Crash Reporting
   implementation("io.sentry:sentry-android:7.8.0")
+  
+  // Biometrics
+  implementation("androidx.biometric:biometric:1.1.0")
 }

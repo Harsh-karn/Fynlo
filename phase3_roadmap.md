@@ -29,7 +29,13 @@
    - **Status**: Completed
    - **Description**: Ensure frontend/mobile crashes are tracked effectively before public release.
 
-5. **Play Store submission (Android)**
+5. **Add biometric/PIN app lock on Android**
+   - **Category**: Security
+   - **Priority**: Medium
+   - **Status**: Completed
+   - **Description**: Secure financial data by requiring device biometric or PIN authentication before rendering the app.
+
+6. **Play Store submission (Android)**
    - **Category**: Business & GTM
    - **Priority**: Critical
    - **Status**: Not started
