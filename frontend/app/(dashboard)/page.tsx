@@ -7,6 +7,7 @@ import { CategoryDonut } from "@/components/dashboard/CategoryDonut"
 import { AlertCircle, RefreshCw, Info } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import api from "@/lib/api"
+import { AdUnit } from "@/components/shared/AdUnit"
 
 interface TrendData {
   month: string
@@ -142,6 +143,10 @@ export default function DashboardPage() {
           <div className="grid gap-6 grid-cols-1 md:grid-cols-4">
             <SpendingChart data={trends} />
             <CategoryDonut data={breakdown} />
+          </div>
+
+          <div className="pt-4">
+            <AdUnit adSlot="dashboard_footer_ad" />
           </div>
         </>
       )}

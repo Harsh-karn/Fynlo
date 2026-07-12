@@ -11,17 +11,11 @@
    - **Status**: Completed
    - **Description**: Create a `/` landing page in Next.js explaining the value prop, security (DPDP), and featuring a beautiful pricing table.
 
-2. **Launch paid tier with subscription billing (Stripe/Razorpay)**
+2. **Integrate Google AdSense for monetization**
    - **Category**: Business & GTM
    - **Priority**: High
-   - **Status**: Not started
-   - **Description**: Integrate payment gateway to handle subscription management, upgrades, and cancellations.
-
-3. **Finalize pricing based on real unit economics**
-   - **Category**: Business & GTM
-   - **Priority**: Critical
-   - **Status**: Not started
-   - **Description**: Ensure the subscription cost covers AI tokens, database hosting, and expected margins.
+   - **Status**: Completed
+   - **Description**: Add AdSense script, ads.txt, and non-intrusive ad placements on dashboard/transactions pages. No subscription model.
 
 4. **Set up Crashlytics/Sentry for Android app**
    - **Category**: Testing & Observability

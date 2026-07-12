@@ -1,4 +1,5 @@
 import { TransactionTable } from "@/components/transactions/TransactionTable"
+import { AdUnit } from "@/components/shared/AdUnit"
 
 export default function TransactionsPage() {
   return (
@@ -11,6 +12,10 @@ export default function TransactionsPage() {
       </div>
       
       <TransactionTable />
+
+      <div className="pt-4">
+        <AdUnit adSlot="transactions_footer_ad" />
+      </div>
     </div>
   )
 }

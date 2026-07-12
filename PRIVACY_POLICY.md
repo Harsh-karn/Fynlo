@@ -31,7 +31,11 @@ We strictly process your data only for the purposes you explicitly consent to:
 - To generate budget alerts, weekly/monthly spending summaries, and insights.
 - To improve our categorization algorithms (using anonymized, stripped data only).
 
-**We DO NOT sell, rent, or lease your personal or financial data to any third-party advertisers or brokers.**
+**Advertising and Data Sharing Policy**
+Fynlo uses Google AdSense to serve advertisements, allowing us to keep the core service free. 
+- Google AdSense may use cookies to serve ads based on your prior visits to Fynlo or other websites.
+- Google's use of advertising cookies enables it and its partners to serve ads to you based on your browsing history.
+- **Strict Data Isolation:** We DO NOT share, sell, or rent your personal financial data (bank statements, SMS texts, balances, transaction history) to Google, advertisers, or any third-party data brokers. Ads are served based on generalized demographic/browsing data, entirely separate from your Fynlo financial profile.
 
 ---
 
@@ -53,6 +57,7 @@ Under the DPDP Act, you are the Data Principal and retain full ownership of your
 
 ## 5. AI and Third-Party Processing
 - **AI Categorization:** Fynlo uses Large Language Models (LLMs) to categorize unknown merchants. When data is sent to an LLM provider, we strip PII (Personally Identifiable Information). We only send the raw merchant string and transaction amount.
+- **Advertising (Google AdSense):** Third-party vendors, including Google, use cookies to serve ads. You may opt out of personalized advertising by visiting [Google Ads Settings](https://www.google.com/settings/ads).
 - **Data Residency:** All data is encrypted at rest and in transit (TLS/SSL) and is stored on secure cloud servers located within [Insert Data Center Region, e.g., Mumbai, India] to comply with data localization preferences.
 
 ---
