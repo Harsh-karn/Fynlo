@@ -50,8 +50,8 @@
 7. **Write operational metrics dashboard (querying active users, API costs)**
    - **Category**: Testing & Observability
    - **Priority**: High
-   - **Status**: Not started
-   - **Description**: Create an internal admin view or Grafana dashboard tracking Daily Active Users (DAU), AI token costs, and conversion rates.
+   - **Status**: Completed
+   - **Description**: Create an internal admin view tracking Daily Active Users (DAU), AI token costs, and conversion rates. Also wrote the incident runbook.
 
 8. **Product Hunt / IndieHackers launch**
    - **Category**: Business & GTM

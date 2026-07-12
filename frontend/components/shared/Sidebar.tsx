@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Home, CreditCard, Upload, PieChart, Wallet, Settings, X } from 'lucide-react'
+import { Home, CreditCard, Upload, PieChart, Wallet, Settings, X, ShieldAlert } from 'lucide-react'
 
 interface SidebarProps {
   onClose?: () => void
@@ -26,6 +26,7 @@ export function Sidebar({ onClose }: SidebarProps) {
       </nav>
       
       <div className="p-4 border-t border-[#2a2a4e]">
+        <NavItem href="/admin" icon={<ShieldAlert size={20} />} label="Ops / Admin" onClick={onClose} />
         <NavItem href="/settings" icon={<Settings size={20} />} label="Settings" onClick={onClose} />
       </div>
     </div>
