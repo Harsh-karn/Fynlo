@@ -64,3 +64,9 @@
    - **Priority**: Medium
    - **Status**: Completed
    - **Description**: Analyze competitors (Fold, Axio, INDmoney, Jupiter) to identify gaps, weaknesses, and clear positioning opportunities for Fynlo.
+
+10. **Set up custom domain for frontend/backend**
+   - **Category**: Infrastructure
+   - **Priority**: Medium
+   - **Status**: Completed
+   - **Description**: Documented GoDaddy DNS configuration and environment variable updates for Vercel/Render in docs/custom_domain_setup.md
