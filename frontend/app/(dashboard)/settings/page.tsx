@@ -14,6 +14,7 @@ import {
   LogOut,
   Shield,
   CheckCircle,
+  CreditCard,
 } from "lucide-react"
 import api from "@/lib/api"
 
@@ -26,6 +27,50 @@ export default function SettingsPage() {
   const [exporting, setExporting] = useState<"csv" | "json" | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
+  const [upgrading, setUpgrading] = useState(false)
+
+  const handleUpgrade = async () => {
+    setUpgrading(true)
+    setErrorMsg(null)
+    try {
+      const res = await api.post("/billing/create-subscription")
+      const { subscription_id } = res.data
+      
+      const options = {
+        key: process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID || "rzp_test_mockkey", 
+        subscription_id: subscription_id,
+        name: "Fynlo",
+        description: "Upgrade to Fynlo Pro",
+        handler: async function (response: { razorpay_payment_id: string; razorpay_subscription_id: string; razorpay_signature: string }) {
+          try {
+            await api.post("/billing/verify-subscription", {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
+              razorpay_signature: response.razorpay_signature
+            })
+            setSuccessMsg("Successfully upgraded to Fynlo Pro!")
+            setTimeout(() => window.location.reload(), 2000)
+          } catch {
+            setErrorMsg("Payment verification failed. Contact support.")
+          }
+        },
+        prefill: {
+          name: (session?.user as { name?: string })?.name,
+          email: (session?.user as { email?: string })?.email,
+        },
+        theme: {
+          color: "#4f46e5"
+        }
+      }
+      const rzp = new (window as unknown as { Razorpay: new (options: unknown) => { open: () => void } }).Razorpay(options)
+      rzp.open()
+      
+    } catch {
+      setErrorMsg("Failed to initiate upgrade.")
+    } finally {
+      setUpgrading(false)
+    }
+  }
 
   async function handleExport(format: "csv" | "json") {
     setExporting(format)
@@ -104,6 +149,27 @@ export default function SettingsPage() {
             <p className="text-gray-500 mb-1">Email</p>
             <p className="text-white font-medium">{(session?.user as { email?: string })?.email ?? "—"}</p>
           </div>
+        </div>
+      </section>
+
+      {/* Billing */}
+      <section className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-6 space-y-4">
+        <div className="flex items-center gap-3 mb-1">
+          <CreditCard className="size-5 text-indigo-400" />
+          <h2 className="font-semibold text-white text-lg">Billing & Plan</h2>
+        </div>
+        <p className="text-gray-400 text-sm leading-relaxed">
+          You are currently on the <strong className="text-white">Starter</strong> plan. 
+          Upgrade to unlock Unlimited AI Categorization and priority support.
+        </p>
+        <div className="pt-2">
+          <Button
+            onClick={handleUpgrade}
+            disabled={upgrading}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+          >
+            {upgrading ? "Loading..." : "Upgrade to Fynlo Pro (₹299/mo)"}
+          </Button>
         </div>
       </section>
 

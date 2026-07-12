@@ -9,7 +9,7 @@ import logging
 import sentry_sdk
 from app.config import settings
 from app.limiter import limiter
-from app.routers import auth, transactions, sms, statements, budgets, analytics
+from app.routers import auth, transactions, sms, statements, budgets, analytics, billing
 
 # Initialize Sentry if configured
 if settings.SENTRY_DSN:
@@ -146,4 +146,5 @@ app.include_router(sms.router)
 app.include_router(statements.router)
 app.include_router(budgets.router)
 app.include_router(analytics.router)
+app.include_router(billing.router)
 

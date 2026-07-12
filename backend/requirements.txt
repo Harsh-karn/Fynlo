@@ -18,3 +18,4 @@ pytest
 httpx
 sentry-sdk[fastapi]
 slowapi
+razorpay

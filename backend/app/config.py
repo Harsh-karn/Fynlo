@@ -20,6 +20,10 @@ class Settings(BaseSettings):
     SENTRY_DSN: Optional[str] = None
     REQUIRE_INVITE_TOKEN: bool = False
     TESTING: bool = False
+    
+    RAZORPAY_KEY_ID: Optional[str] = None
+    RAZORPAY_KEY_SECRET: Optional[str] = None
+    RAZORPAY_WEBHOOK_SECRET: Optional[str] = None
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
